@@ -1,0 +1,18 @@
+# .gitignore
+
+client-*/
+client/debug*/
+client/release*/
+
+server-*/
+server/debug*/
+server/release*/
+
+ui_*.h
+
+Makefile*
+*.user*
+
+*.bak
+*.tmp
+*~
