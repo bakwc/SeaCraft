@@ -7,7 +7,8 @@ class Images
 {
 public:
     void load();
-    QImage& get(const QString& imgName);
+    QImage& get( const QString& imgName );
+
 private:
-    QMap<QString,QImage> images;
+    QMap<QString, QImage> images;
 };

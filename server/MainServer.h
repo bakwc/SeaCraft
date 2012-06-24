@@ -14,15 +14,15 @@
 class SleeperThread : public QThread
 {
 public:
-    static void msleep(unsigned long msecs)
+    static void msleep( unsigned long msecs )
     {
-        QThread::msleep(msecs);
+        QThread::msleep( msecs );
     }
 };
 
 enum ClientStatus
 {
-    ST_CONNECTED=0,
+    ST_CONNECTED = 0,
     ST_AUTHORIZED,
     ST_READY,
     ST_WAITING_STEP,
@@ -34,7 +34,7 @@ struct Client
     QTcpSocket* socket;
     ClientStatus status;
     QMap<int, Client>::iterator playingWith;
-    void send(const QString& cmd);
+    void send( const QString& cmd );
     Field field;
 };
 
@@ -45,20 +45,26 @@ class MainServer: public QObject
     Q_OBJECT
 public:
     MainServer();
+
 private slots:
     void onNewUserConnected();
     void receivedData();
     void onTimer();
+
 private:
-    void parseData(const QString& cmd,int clientId);
-    bool authorize(const QString& cmd,Clients::iterator client);
-    bool setField(const QString& cmd,Clients::iterator client);
-    bool makeStep(const QString& cmd, Clients::iterator client);
-    bool placeShips(const QString& ships,Clients::iterator client);
-    void connectTwoClients(Clients::iterator client1, Clients::iterator client2);
+    void parseData( const QString& cmd, int clientId );
+    bool authorize( const QString& cmd, Clients::iterator client );
+    bool setField( const QString& cmd, Clients::iterator client );
+    bool makeStep( const QString& cmd, Clients::iterator client );
+    bool placeShips( const QString& ships, Clients::iterator client );
+    void connectTwoClients(
+        Clients::iterator client1,
+        Clients::iterator client2
+    );
+
 private:
-    QTcpServer *server;
+    QTcpServer* server;
     Clients clients;
-    QTimer *timer;
+    QTimer* timer;
 };
 
