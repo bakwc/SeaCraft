@@ -1,9 +1,97 @@
+#include <QMessageBox>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+ConnectionInfoDialog::ConnectionInfoDialog( QWidget* parent ):
+    QDialog( parent )
+{
+    verticalLayout = new QVBoxLayout( this );
+    horizontalLayout = new QHBoxLayout( this );
+    addressTextBox = new QLineEdit( this );
+    applyButton = new QPushButton( this );
+    cancelButton = new QPushButton( this );
+
+    verticalLayout->addWidget( addressTextBox );
+    verticalLayout->addLayout( horizontalLayout );
+    horizontalLayout->addWidget( applyButton );
+    horizontalLayout->addWidget( cancelButton );
+
+    this->setFixedSize( 300, 80 );
+
+    applyButton->setText( tr("Apply") );
+    cancelButton->setText( tr("Cancel") );
+
+    applyButton->setDefault( true );
+
+    connect( applyButton, SIGNAL(clicked()), this, SLOT(accept()) );
+    connect( cancelButton, SIGNAL(clicked()), this, SLOT(reject()) );
+}
+
+ConnectionInfoDialog::~ConnectionInfoDialog()
+{
+}
+
+void ConnectionInfoDialog::setAddressString(
+    const QHostAddress& address,
+    quint16 port
+)
+{
+    if( !addressTextBox )
+        return;
+
+    addressTextBox->setText(
+        QString("%1:%2").arg(address.toString()).arg(port)
+    );
+}
+
+QString ConnectionInfoDialog::getAddress()
+{
+    return address;
+}
+
+quint16 ConnectionInfoDialog::getPort()
+{
+    return port;
+}
+
+void ConnectionInfoDialog::accept()
+{
+    QHostAddress addr( addressTextBox->text().replace(QRegExp(":.*"), "") );
+
+    bool ok;
+    port = addressTextBox->text().replace( QRegExp(".*:"), "" ).toInt( &ok );
+
+    if( !addr.isNull() && ok )
+    {
+        address = addr.toString();
+        qDebug(
+            "Server address and port: %s:%d",
+            qPrintable( address ),
+            port
+        );
+        done( QDialog::Accepted );
+        return;
+    }
+
+    QMessageBox::warning(
+        this,
+        tr( "Warning" ),
+        tr( "Specify the valid IPv4 address" )
+    );
+    /*
+    QMessageBox msgbox;
+    msgbox.setText( tr("Specify the valid IPv4 address") );
+    msgbox.exec();
+    */
+    addressTextBox->setFocus();
+}
+
 MainWindow::MainWindow( QWidget* parent ):
     QMainWindow( parent ),
-    ui( new Ui::MainWindow )
+    ui( new Ui::MainWindow ),
+    serverAddress( QHostAddress::LocalHost ),
+    serverPort( 1234 )
 {
     ui->setupUi( this );
     pictures = new Images;
@@ -21,6 +109,20 @@ MainWindow::MainWindow( QWidget* parent ):
     myField->redraw();
     enemyField->redraw();
     state = ST_PLACING_SHIPS;
+
+    connect(
+        client,
+        SIGNAL( connected() ),
+        this,
+        SLOT( onConnected() )
+    );
+    connect(
+        client,
+        SIGNAL( error(QAbstractSocket::SocketError) ),
+        this,
+        SLOT( onError(QAbstractSocket::SocketError) )
+    );
+    connect( ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()) );
 }
 
 MainWindow::~MainWindow()
@@ -88,16 +190,81 @@ void MainWindow::mousePressEvent( QMouseEvent* ev )
     }
 }
 
-void MainWindow::on_actionStart_activated()
+void MainWindow::on_actionConnect_triggered()
+{
+    if( client->state() == QAbstractSocket::ConnectedState )
+    {
+        QMessageBox::information(
+            this,
+            tr( "Connection Info" ),
+            tr( "Already connected" )
+        );
+        return;
+    }
+
+    ConnectionInfoDialog* connectionDialog = new ConnectionInfoDialog( this );
+
+    connectionDialog->setAddressString( serverAddress, serverPort );
+    connectionDialog->setModal( true );
+    if( connectionDialog->exec() != QDialog::Accepted )
+    {
+        qDebug() << "ConnectionDialog::rejected";
+        return;
+    }
+
+    serverAddress = connectionDialog->getAddress();
+    serverPort = connectionDialog->getPort();
+
+    qDebug(
+        "Connected to host %s:%d",
+        qPrintable( serverAddress.toString() ),
+        serverPort
+    );
+
+    client->connectToHost( serverAddress, serverPort );
+}
+
+void MainWindow::on_actionDisconnect_triggered()
+{
+    if( client->state() == QAbstractSocket::ConnectedState )
+    {
+        qDebug() << "Disconnecting from host";
+        client->disconnectFromHost();
+        state = ST_PLACING_SHIPS;
+    }
+}
+
+void MainWindow::onError( QAbstractSocket::SocketError socketError )
+{
+    Q_UNUSED( socketError );
+    qDebug() << client->errorString();
+    QMessageBox::critical(
+        this,
+        tr("Connection Error"),
+        client->errorString()
+    );
+}
+
+void MainWindow::onDataReceived()
+{
+    QString data;
+    data = client->read( 500 );
+    qDebug() << "Data:" << data;
+    parseData( data );
+}
+
+void MainWindow::onConnected()
 {
     QString response;
     QString request;
-    qDebug() << "Pressed start";
-    client->connectToHost( "172.28.0.25", 1234 );
+
     client->write( "mbclient:1:guest:guest:" );
 
     if( !client->waitForReadyRead(5000) )
+    {
+        qDebug() << "Wait for ready read timeout";
         return;
+    }
 
     response = client->readAll();
     qDebug() << response;
@@ -109,14 +276,6 @@ void MainWindow::on_actionStart_activated()
     //
     //client->waitForReadyRead();
     //clientStream >> response;
-}
-
-void MainWindow::onDataReceived()
-{
-    QString data;
-    data = client->read( 500 );
-    qDebug() << "Data:" << data;
-    parseData( data );
 }
 
 void MainWindow::parseData( const QString& data )
