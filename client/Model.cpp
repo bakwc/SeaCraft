@@ -67,7 +67,61 @@ QString Model::getLogin() const
 {
     return login;
 }
+
 QString Model::getPassword() const
 {
     return pass;
+}
+
+bool Model::checkMyField() const
+{   // Check field for correct ship placement
+    return (shipNum(1)==4 &&
+            shipNum(2)==3 &&
+            shipNum(3)==2 &&
+            shipNum(4)==1);
+}
+
+int Model::shipNum(int size) const
+{
+    int shipNumber=0;
+    for (int i=0;i<10;i++)
+        for (int j=0;j<10;j++)
+            if (isShip(size,i,j))
+                shipNumber++;
+    return shipNumber;
+}
+
+bool Model::isShip(int size, int x, int y) const
+{
+    if (x>0 && myField->getCell(x-1,y)!=CL_CLEAR) return false; // left field !clear
+    if (y>0 && myField->getCell(x,y-1)!=CL_CLEAR) return false; // up field !clear
+    if (myField->getCell(x,y)==CL_CLEAR) return false;  // no ship here
+    int tmp=x,num=0;
+
+    while (myField->getCell(tmp,y)!=CL_CLEAR && tmp<10)    // checking in right direction
+    {
+        tmp++;
+        num++;
+    }
+    if (num==size)
+    {
+        if (myField->getCell(x,y+1)!=CL_CLEAR)
+            return false;
+        return true;
+    }
+
+    tmp=y,num=0;
+    while (myField->getCell(x,tmp)!=CL_CLEAR && tmp<10)    // checking in down direction
+    {
+        tmp++;
+        num++;
+    }
+    if (num==size)
+    {
+        if (myField->getCell(x+1,y)!=CL_CLEAR)
+            return false;
+        return true;
+    }
+
+    return false;
 }

@@ -14,7 +14,7 @@ Cell Field::getCell(int x, int y)
     int n=y*10+x;
     if (n>=0 && n<field.size())
         return field[n];
-    qDebug() << "ERROR: no such cell";
+    //qDebug() << "ERROR: no such cell";
     return CL_CLEAR;
 }
 

@@ -97,6 +97,13 @@ bool Controller::parseFields(const QString& data)
 
 void Controller::onGameStart()
 {
+    if (!model->checkMyField())
+    {
+        QMessageBox::information(this,"Connection Info",
+                             "Wrong ships placement!", QMessageBox::Ok, 0);
+        return;
+    }
+
     if( client->state() == QAbstractSocket::ConnectedState )
     {
         QMessageBox::information( this, "Connection Info",
