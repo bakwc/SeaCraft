@@ -5,7 +5,7 @@
 
 enum Cell
 {
-    CL_CLEAR=0,
+    CL_CLEAR = 0,
     CL_SHIP,
     CL_DOT,
     CL_HALF
@@ -14,10 +14,11 @@ enum Cell
 class Field
 {
 public:
-    void initField(const QString& initData);
-    Cell getCell(int x, int y);
-    void setCell(int x, int y, Cell cell);
-    static bool isFieldCorrect(const QString& fieldstr);
+    void initField( const QString& initData );
+    Cell getCell( int x, int y );
+    void setCell( int x, int y, Cell cell );
+    static bool isFieldCorrect( const QString& fieldstr );
+
 private:
     QVector<Cell> field;
 };

@@ -11,18 +11,21 @@
 #include <QThread>
 #include "Field.h"
 
+const quint16 DEFAULT_PORT = 1234;
+const quint16 DEFAULT_SEARCH_INTERVAL = 3000;
+
 class SleeperThread : public QThread
 {
 public:
-    static void msleep(unsigned long msecs)
+    static void msleep( unsigned long msecs )
     {
-        QThread::msleep(msecs);
+        QThread::msleep( msecs );
     }
 };
 
 enum ClientStatus
 {
-    ST_CONNECTED=0,
+    ST_CONNECTED = 0,
     ST_AUTHORIZED,
     ST_READY,
     ST_WAITING_STEP,
@@ -31,10 +34,13 @@ enum ClientStatus
 
 struct Client
 {
+    typedef QMap<int, Client>::iterator ClientIterator;
+    typedef QMap<int, Client>::const_iterator ClientConstIterator;
+
     QTcpSocket* socket;
     ClientStatus status;
-    QMap<int, Client>::iterator playingWith;
-    void send(const QString& cmd);
+    ClientIterator playingWith;
+    void send( const QString& cmd );
     Field field;
 };
 
@@ -44,21 +50,39 @@ class MainServer: public QObject
 {
     Q_OBJECT
 public:
+    typedef Clients::iterator ClientsIterator;
+    typedef Clients::const_iterator ClientsConstIterator;
+
+public:
     MainServer();
+    bool spawn();
+    bool spawn(
+        const QHostAddress& address,
+        quint16 port
+    );
+    void parceCmdLine( const QStringList& arguments );
+
 private slots:
     void onNewUserConnected();
     void receivedData();
     void onTimer();
+
 private:
-    void parseData(const QString& cmd,int clientId);
-    bool authorize(const QString& cmd,Clients::iterator client);
-    bool setField(const QString& cmd,Clients::iterator client);
-    bool makeStep(const QString& cmd, Clients::iterator client);
-    bool placeShips(const QString& ships,Clients::iterator client);
-    void connectTwoClients(Clients::iterator client1, Clients::iterator client2);
+    void parseData( const QString& cmd, int clientId );
+    bool authorize( const QString& cmd, ClientsIterator client );
+    bool setField( const QString& cmd, ClientsIterator client );
+    bool makeStep( const QString& cmd, ClientsIterator client );
+    bool placeShips( const QString& ships, ClientsIterator client );
+    void connectTwoClients(
+        ClientsIterator client1,
+        ClientsIterator client2
+    );
+
 private:
-    QTcpServer *server;
+    QTcpServer* server;
+    QTimer* timer;
     Clients clients;
-    QTimer *timer;
+    QHostAddress address;
+    quint16 port;
 };
 
