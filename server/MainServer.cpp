@@ -7,7 +7,11 @@ void Client::send( const QString& cmd )
     clientStream << flush;
 }
 
-MainServer::MainServer()
+MainServer::MainServer():
+    server( NULL ),
+    timer( NULL ),
+    address( QHostAddress::Any ),
+    port( DEFAULT_PORT )
 {
     server = new QTcpServer( this );
     connect(
@@ -16,12 +20,72 @@ MainServer::MainServer()
         this,
         SLOT( onNewUserConnected() )
     );
-    server->listen( QHostAddress::Any, 1234 );
-    qDebug() << "Server started";
+}
+
+void MainServer::parceCmdLine( const QStringList& arguments )
+{
+    for( int i = 1; i < arguments.count(); i++ )
+    {
+        if(
+            arguments.at(i).compare("--port") == 0 &&
+            i < arguments.count() - 1
+        )
+        {
+            bool ok;
+            this->port = arguments.at( i + 1 ).toInt( &ok );
+
+            if( !ok )
+            {
+                this->port = DEFAULT_PORT;
+                continue;
+            }
+
+            i++;
+            continue;
+        }
+
+        if(
+            arguments.at(i).compare("--address") == 0 &&
+            i < arguments.count() - 1
+        )
+        {
+            this->address.setAddress( arguments.at(i+1) );
+            i++;
+            continue;
+        }
+    }
+}
+
+bool MainServer::spawn()
+{
+    return spawn( this->address, this->port );
+}
+
+bool MainServer::spawn( const QHostAddress& address, quint16 port )
+{
+    if( !server )
+        return false;
+
+    if( !server->listen( address, port ) )
+    {
+        qDebug(
+            "Server spawning failed: %s",
+            qPrintable( server->errorString() )
+        );
+        return false;
+    }
+
     timer = new QTimer( this );
-    timer->setInterval( 3000 );
+    timer->setInterval( DEFAULT_SEARCH_INTERVAL );
     connect( timer, SIGNAL(timeout()), this, SLOT(onTimer()) );
     timer->start();
+
+    qDebug(
+        "Server started at %s:%d",
+        qPrintable( address.toString() ),
+        port
+    );
+    return true;
 }
 
 void MainServer::onNewUserConnected()

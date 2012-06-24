@@ -11,6 +11,9 @@
 #include <QThread>
 #include "Field.h"
 
+const quint16 DEFAULT_PORT = 1234;
+const quint16 DEFAULT_SEARCH_INTERVAL = 3000;
+
 class SleeperThread : public QThread
 {
 public:
@@ -45,6 +48,12 @@ class MainServer: public QObject
     Q_OBJECT
 public:
     MainServer();
+    bool spawn();
+    bool spawn(
+        const QHostAddress& address,
+        quint16 port
+    );
+    void parceCmdLine( const QStringList& arguments );
 
 private slots:
     void onNewUserConnected();
@@ -64,7 +73,9 @@ private:
 
 private:
     QTcpServer* server;
-    Clients clients;
     QTimer* timer;
+    Clients clients;
+    QHostAddress address;
+    quint16 port;
 };
 
