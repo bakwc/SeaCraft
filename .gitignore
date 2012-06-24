@@ -3,6 +3,7 @@
 client-*/
 client/debug*/
 client/release*/
+client/object_script*
 
 server-*/
 server/debug*/

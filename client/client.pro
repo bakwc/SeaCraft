@@ -16,10 +16,17 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     Field.cpp \
-    Images.cpp
+    Images.cpp \
+    Model.cpp \
+    Controller.cpp \
+    Utility.cpp
 
 HEADERS  += mainwindow.h \
     Field.h \
-    Images.h
+    Images.h \
+    Model.h \
+    Controller.h \
+    Utility.h \
+    Defines.h
 
 FORMS    += mainwindow.ui

@@ -9,19 +9,14 @@
 #include <QDebug>
 #include <QtNetwork/QTcpSocket>
 #include "Images.h"
-#include "Field.h"
+#include "Model.h"
+#include "Controller.h"
+#include "Defines.h"
 
 
 namespace Ui {
 class MainWindow;
 }
-
-enum State
-{
-    ST_PLACING_SHIPS,
-    ST_WAITING_STEP,
-    ST_MAKING_STEP
-};
 
 class MainWindow : public QMainWindow
 {
@@ -37,19 +32,17 @@ protected:
     
 private slots:
     void on_actionStart_activated();
-    void onDataReceived();
+    void redraw();
 private:
-    void parseData(const QString& data);
-    bool parseGo(const QString& data);
-    bool parseFields(const QString& data);
-
+    QImage myFieldImage();
+    QImage enemyFieldImage();
+    QImage getFieldImage(char);
 private:
     Ui::MainWindow *ui;
     Images *pictures;
-    Field *myField,
-          *enemyField;
     State state;
-    QTcpSocket *client;
+    Model *model;
+    Controller *controller;
 };
 
 #endif // MAINWINDOW_H
