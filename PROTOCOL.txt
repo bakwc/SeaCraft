@@ -7,10 +7,10 @@
     Client
 * user interface
 * API for palcing ships
-* connection to server and playing matches    
+* connection to server and playing matches
 
     Session
-    
+
 > mbclient:1:SuperBot:119xoOlh%2:
 < mbserver:1:
 > field:001001011100...001101011:
@@ -36,7 +36,7 @@ disconnect
 
 
     Session's description
-    
+
 1) Client says a string: ':mbclient:client_protocol_number:login:password:'
   * protocol is a positive number
   * login & password are strings of latin latters and digits, specific symbols
@@ -49,12 +49,16 @@ disconnect
 6) Client says 'step:cell_X:cell_Y:'
   * cell_X,cell_y from >=0 and <= 9
 7) Server says 'field2:hits_info:cell_X:cell_Y:'.
-  * hits info --- one of three alternatives: miss, half – ship was hurted, kill – ship was died. 
+  * hits info --- one of three alternatives: miss, half – ship was hurted, kill – ship was died.
   This is an information did player hit some ships.
-8) Server says: 'field1:hits_info:cell_X:cell_Y:'. 
+8) Server says: 'field1:hits_info:cell_X:cell_Y:'.
 9) After finishing a game server says 'win:' or 'lose:' and closes connection.
-10) In case of an opponen have lieaved the game server says 'diconnected:' and closes connection.
+10) In case of an opponent has left the game
+	server says 'disconnected:' and closes connection.
 11) In case of bad request server says 'wrongcmd:'
+12) In case of illegal login or password
+	server says 'wronguser:' and closes connection.
+13) On protocol version mismatch server says 'wrongver:' and closes connection.
 
 
 
