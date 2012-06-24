@@ -39,13 +39,26 @@
     <property name="title">
      <string>Game</string>
     </property>
-    <addaction name="actionStart"/>
+    <addaction name="actionConnect"/>
+    <addaction name="actionDisconnect"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
-  <action name="actionStart">
+  <action name="actionConnect">
    <property name="text">
-    <string>Start</string>
+    <string>Connect</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionDisconnect">
+   <property name="text">
+    <string>Disconnect</string>
    </property>
   </action>
  </widget>
