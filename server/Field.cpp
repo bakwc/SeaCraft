@@ -2,8 +2,12 @@
 
 void Field::initField( const QString& initData )
 {
-    for( QString::const_iterator i = initData.begin(); i < initData.end(); i++ )
-        field.push_back( Cell( QString( *i ).toInt() ) );
+    for(
+        QString::const_iterator i = initData.constBegin();
+        i < initData.constEnd();
+        i++
+    )
+        field.push_back( Cell(QString(*i).toInt()) );
 }
 
 Cell Field::getCell( int x, int y )
@@ -32,7 +36,9 @@ void Field::setCell( int x, int y, Cell cell )
 
 bool Field::isFieldCorrect( const QString& fieldstr )
 {
-    if( fieldstr.size() != 100 ) return false; // TODO: 100 - width*height
+    // TODO: 100 - width*height
+    if( fieldstr.size() != 100 )
+        return false;
 
     // TODO: Check for ships correctness
     return true;

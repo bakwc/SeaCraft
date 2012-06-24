@@ -27,7 +27,7 @@ void MainServer::parceCmdLine( const QStringList& arguments )
     for( int i = 1; i < arguments.count(); i++ )
     {
         if(
-            arguments.at(i).compare("--port") == 0 &&
+            arguments.at( i ).compare( "--port" ) == 0 &&
             i < arguments.count() - 1
         )
         {
@@ -45,7 +45,7 @@ void MainServer::parceCmdLine( const QStringList& arguments )
         }
 
         if(
-            arguments.at(i).compare("--address") == 0 &&
+            arguments.at( i ).compare( "--address" ) == 0 &&
             i < arguments.count() - 1
         )
         {
@@ -66,7 +66,7 @@ bool MainServer::spawn( const QHostAddress& address, quint16 port )
     if( !server )
         return false;
 
-    if( !server->listen( address, port ) )
+    if( !server->listen(address, port) )
     {
         qDebug(
             "Server spawning failed: %s",
@@ -114,18 +114,18 @@ void MainServer::receivedData()
 
 void MainServer::parseData( const QString& cmd, int clientId )
 {
-    Clients::iterator i = clients.find( clientId );
+    ClientsIterator i = clients.find( clientId );
 
     if( i == clients.end() )
         return;
 
-    if( authorize( cmd, i ) )
+    if( authorize(cmd, i) )
         return;
 
-    if( setField( cmd, i ) )
+    if( setField(cmd, i) )
         return;
 
-    if( makeStep( cmd, i ) )
+    if( makeStep(cmd, i) )
         return;
 
     i->send( "wrongcmd:" );
@@ -156,7 +156,7 @@ bool MainServer::authorize( const QString& cmd, Clients::iterator client )
     return false;
 }
 
-bool MainServer::setField( const QString& cmd, Clients::iterator client )
+bool MainServer::setField( const QString& cmd, ClientsIterator client )
 {
     QRegExp rx( "field:([01]+):" );
 
@@ -231,9 +231,9 @@ bool MainServer::placeShips( const QString& ships, Clients::iterator client )
 void MainServer::onTimer()
 {
     // Searching for free clients and connecting them
-    Clients::iterator freeClient = clients.end();
+    ClientsIterator freeClient = clients.end();
 
-    for( Clients::iterator i = clients.begin(); i != clients.end(); i++ )
+    for( ClientsIterator i = clients.begin(); i != clients.end(); i++ )
     {
         if( i->status == ST_READY )
         {
@@ -249,8 +249,8 @@ void MainServer::onTimer()
 }
 
 void MainServer::connectTwoClients(
-    Clients::iterator client1,
-    Clients::iterator client2
+    ClientsIterator client1,
+    ClientsIterator client2
 )
 {
     client1->status = ST_MAKING_STEP;

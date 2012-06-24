@@ -34,9 +34,12 @@ enum ClientStatus
 
 struct Client
 {
+    typedef QMap<int, Client>::iterator ClientIterator;
+    typedef QMap<int, Client>::const_iterator ClientConstIterator;
+
     QTcpSocket* socket;
     ClientStatus status;
-    QMap<int, Client>::iterator playingWith;
+    ClientIterator playingWith;
     void send( const QString& cmd );
     Field field;
 };
@@ -46,6 +49,10 @@ typedef QMap<int, Client> Clients;
 class MainServer: public QObject
 {
     Q_OBJECT
+public:
+    typedef Clients::iterator ClientsIterator;
+    typedef Clients::const_iterator ClientsConstIterator;
+
 public:
     MainServer();
     bool spawn();
@@ -62,13 +69,13 @@ private slots:
 
 private:
     void parseData( const QString& cmd, int clientId );
-    bool authorize( const QString& cmd, Clients::iterator client );
-    bool setField( const QString& cmd, Clients::iterator client );
-    bool makeStep( const QString& cmd, Clients::iterator client );
-    bool placeShips( const QString& ships, Clients::iterator client );
+    bool authorize( const QString& cmd, ClientsIterator client );
+    bool setField( const QString& cmd, ClientsIterator client );
+    bool makeStep( const QString& cmd, ClientsIterator client );
+    bool placeShips( const QString& ships, ClientsIterator client );
     void connectTwoClients(
-        Clients::iterator client1,
-        Clients::iterator client2
+        ClientsIterator client1,
+        ClientsIterator client2
     );
 
 private:
