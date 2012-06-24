@@ -52,3 +52,22 @@ void Model::setState(State st)
 {
     state=st;
 }
+
+void Model::setLogin(const QString& str)
+{
+    login=str;
+}
+
+void Model::setPassword(const QString& str)
+{
+    pass=str;
+}
+
+QString Model::getLogin() const
+{
+    return login;
+}
+QString Model::getPassword() const
+{
+    return pass;
+}

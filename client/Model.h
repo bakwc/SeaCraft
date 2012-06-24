@@ -24,7 +24,12 @@ public:
     Cell getEnemyCell(int x, int y) const;
     void setEnemyCell(int x, int y, Cell cell);
     QString getEnemyField() const;
+    void setLogin(const QString& str);
+    void setPassword(const QString& str);
+    QString getLogin() const;
+    QString getPassword() const;
 private:
     Field *myField, *enemyField;
     State state;
+    QString login,pass;
 };
