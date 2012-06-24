@@ -15,14 +15,10 @@ Controller::Controller(Model *model_):
     );
 
     connect(
-        client, SIGNAL( connected() ),
-        this, SLOT( onConnected() )
-    );
-
-    connect(
         client, SIGNAL( error(QAbstractSocket::SocketError) ),
         this, SLOT( onError(QAbstractSocket::SocketError) )
     );
+
 }
 
 void Controller::onMousePressed(const QPoint& pos)
