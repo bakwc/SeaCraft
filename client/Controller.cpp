@@ -1,10 +1,28 @@
 #include "Controller.h"
 
-Controller::Controller(Model *model_):model(model_)
+Controller::Controller(Model *model_):
+    model(model_),
+    serverAddress( QHostAddress::LocalHost ),
+    serverPort( 1234 )
 {
     client = new QTcpSocket(this);
     connect(client,SIGNAL(readyRead()),
             this,SLOT(onDataReceived()));
+
+    connect(
+        client, SIGNAL( connected() ),
+        this, SLOT( onConnected() )
+    );
+
+    connect(
+        client, SIGNAL( connected() ),
+        this, SLOT( onConnected() )
+    );
+
+    connect(
+        client, SIGNAL( error(QAbstractSocket::SocketError) ),
+        this, SLOT( onError(QAbstractSocket::SocketError) )
+    );
 }
 
 void Controller::onMousePressed(const QPoint& pos)
@@ -83,11 +101,60 @@ bool Controller::parseFields(const QString& data)
 
 void Controller::onGameStart()
 {
+    if( client->state() == QAbstractSocket::ConnectedState )
+    {
+        QMessageBox::information( this, "Connection Info",
+            "Already connected", QMessageBox::Ok, 0 );
+        return;
+    }
+
+    ConnectionInfoDialog* connectionDialog = new ConnectionInfoDialog( this );
+
+    connectionDialog->setAddressString( serverAddress, serverPort );
+    connectionDialog->setModal( true );
+    if( connectionDialog->exec() != QDialog::Accepted )
+    {
+        qDebug() << "ConnectionDialog::rejected";
+        return;
+    }
+
+    serverAddress = connectionDialog->getAddress();
+    serverPort = connectionDialog->getPort();
+
+    qDebug(
+        "Connected to host %s:%d",
+        qPrintable( serverAddress.toString() ),
+        serverPort
+    );
+
+    client->connectToHost( serverAddress, serverPort );
+}
+
+void Controller::on_actionDisconnect_triggered()
+{
+    if( client->state() == QAbstractSocket::ConnectedState )
+    {
+        qDebug() << "Disconnecting from host";
+        client->disconnectFromHost();
+        model->setState(ST_PLACING_SHIPS);
+    }
+}
+
+void Controller::onError( QAbstractSocket::SocketError socketError )
+{
+    Q_UNUSED( socketError );
+    qDebug() << client->errorString();
+    QMessageBox::critical(
+        this,
+        tr("Connection Error"),
+        client->errorString()
+    );
+}
+
+void Controller::onConnected()
+{
     QString response;
     QString request;
-
-    qDebug() << "Starting game";
-    client->connectToHost("172.28.0.25",1234);
 
     client->write("mbclient:1:guest:guest:");
     if (!client->waitForReadyRead(5000)) return;
@@ -99,4 +166,9 @@ void Controller::onGameStart()
 
     qDebug() << request;
     model->setState(ST_WAITING_STEP);
+
+    //clientStream << ; // TODO: login+pass
+    //
+    //client->waitForReadyRead();
+    //clientStream >> response;
 }

@@ -3,10 +3,12 @@
 #include <QPoint>
 #include <QTcpSocket>
 #include <QRegExp>
+#include <QMessageBox>
 #include "Model.h"
 #include "Utility.h"
+#include "ConnectionInfoDialog.h"
 
-class Controller: public QObject
+class Controller: public QWidget
 {
     Q_OBJECT
 public:
@@ -17,6 +19,9 @@ signals:
     void stateChanged();
 private slots:
     void onDataReceived();
+    void onConnected();
+    void onError( QAbstractSocket::SocketError socketError );
+    void on_actionDisconnect_triggered();
 private:
     void parseData(const QString& data);
     bool parseGo(const QString& data);
@@ -24,4 +29,6 @@ private:
 private:
     QTcpSocket *client;
     Model *model;
+    QHostAddress serverAddress;
+    quint16 serverPort;
 };
