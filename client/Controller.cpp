@@ -97,6 +97,13 @@ bool Controller::parseFields(const QString& data)
 
 void Controller::onGameStart()
 {
+    if (!model->checkMyField())
+    {
+        QMessageBox::information(this,"Connection Info",
+                             "Wrong ships placement!", QMessageBox::Ok, 0);
+        return;
+    }
+
     if( client->state() == QAbstractSocket::ConnectedState )
     {
         QMessageBox::information( this, "Connection Info",
@@ -105,6 +112,7 @@ void Controller::onGameStart()
     }
 
     ConnectionInfoDialog* connectionDialog = new ConnectionInfoDialog( this );
+
 
     connectionDialog->setAddressString( serverAddress, serverPort );
     connectionDialog->setModal( true );
@@ -116,6 +124,8 @@ void Controller::onGameStart()
 
     serverAddress = connectionDialog->getAddress();
     serverPort = connectionDialog->getPort();
+    model->setLogin(connectionDialog->getLogin());
+    model->setPassword(connectionDialog->getPassword());
 
     qDebug(
         "Connected to host %s:%d",
@@ -151,8 +161,11 @@ void Controller::onConnected()
 {
     QString response;
     QString request;
+    request=QString("mbclient:1:%1:%2:")
+            .arg(model->getLogin())
+            .arg(model->getPassword());
 
-    client->write("mbclient:1:guest:guest:");
+    client->write(request.toLocal8Bit());
     if (!client->waitForReadyRead(5000)) return;
     response=client->readAll();
     qDebug() << response;

@@ -3,18 +3,41 @@
 ConnectionInfoDialog::ConnectionInfoDialog( QWidget* parent ):
     QDialog( parent )
 {
-    verticalLayout = new QVBoxLayout( this );
-    horizontalLayout = new QHBoxLayout( this );
-    addressTextBox = new QLineEdit( this );
     applyButton = new QPushButton( this );
     cancelButton = new QPushButton( this );
 
-    verticalLayout->addWidget( addressTextBox );
-    verticalLayout->addLayout( horizontalLayout );
-    horizontalLayout->addWidget( applyButton );
-    horizontalLayout->addWidget( cancelButton );
+    addrLabel = new QLabel(this);
+    loginLabel = new QLabel(this);
+    passLabel = new QLabel(this);
 
-    this->setFixedSize( 300, 80 );
+    addressTextBox = new QLineEdit( this );
+    loginTextBox = new QLineEdit( this );
+    passTextBox = new QLineEdit( this );
+
+
+    layout = new QGridLayout( this );
+    layout->addWidget(addrLabel,0,0);
+    layout->addWidget(addressTextBox,0,1);
+
+    layout->addWidget(loginLabel,1,0);
+    layout->addWidget(loginTextBox,1,1);
+
+    layout->addWidget(passLabel,2,0);
+    layout->addWidget(passTextBox,2,1);
+
+    layout->addWidget(applyButton,3,0);
+    layout->addWidget(cancelButton,3,1);
+
+    this->setFixedSize( 280, 150 );
+
+    addrLabel->setText(tr("Host:"));
+    loginLabel->setText(tr("Login:"));
+    passLabel->setText(tr("Pass:"));
+
+    loginTextBox->setText(tr("guest"));
+    passTextBox->setText(tr("guest"));
+
+    passTextBox->setEchoMode(QLineEdit::Password);
 
     applyButton->setText( tr("Apply") );
     cancelButton->setText( tr("Cancel") );
@@ -23,6 +46,7 @@ ConnectionInfoDialog::ConnectionInfoDialog( QWidget* parent ):
 
     connect( applyButton, SIGNAL(clicked()), this, SLOT(accept()) );
     connect( cancelButton, SIGNAL(clicked()), this, SLOT(reject()) );
+
 }
 
 ConnectionInfoDialog::~ConnectionInfoDialog()
@@ -42,9 +66,19 @@ void ConnectionInfoDialog::setAddressString(
     );
 }
 
-QString ConnectionInfoDialog::getAddress()
+QString ConnectionInfoDialog::getAddress() const
 {
     return address;
+}
+
+QString ConnectionInfoDialog::getLogin() const
+{
+    return login;
+}
+
+QString ConnectionInfoDialog::getPassword() const
+{
+    return pass;
 }
 
 quint16 ConnectionInfoDialog::getPort()
@@ -58,6 +92,8 @@ void ConnectionInfoDialog::accept()
 
     bool ok;
     port = addressTextBox->text().replace( QRegExp(".*:"), "" ).toInt( &ok );
+    login = loginTextBox->text();
+    pass = passTextBox->text();
 
     if( !addr.isNull() && ok )
     {
@@ -76,10 +112,6 @@ void ConnectionInfoDialog::accept()
         tr( "Warning" ),
         tr( "Specify the valid IPv4 address" )
     );
-    /*
-QMessageBox msgbox;
-msgbox.setText( tr("Specify the valid IPv4 address") );
-msgbox.exec();
-*/
+
     addressTextBox->setFocus();
 }
