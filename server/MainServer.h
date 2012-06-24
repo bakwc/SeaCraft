@@ -13,6 +13,7 @@
 
 const quint16 DEFAULT_PORT = 1234;
 const quint16 DEFAULT_SEARCH_INTERVAL = 3000;
+const quint16 PROTOCOL_VERSION = 1;
 
 class SleeperThread : public QThread
 {
@@ -32,6 +33,15 @@ enum ClientStatus
     ST_MAKING_STEP
 };
 
+struct ClientInfo
+{
+    QString login;
+    quint32 gamesPlayed;
+    quint32 numberOfWins;
+    quint32 numberOfLooses;
+    quint32 numberOfEscapes;
+};
+
 struct Client
 {
     QTcpSocket* socket;
@@ -39,6 +49,7 @@ struct Client
     QMap<int, Client>::iterator playingWith;
     void send( const QString& cmd );
     Field field;
+    ClientInfo statistic;
 };
 
 typedef QMap<int, Client> Clients;
@@ -70,6 +81,7 @@ private:
         Clients::iterator client1,
         Clients::iterator client2
     );
+    bool checkUser( const QString& login, const QString& password );
 
 private:
     QTcpServer* server;
@@ -77,4 +89,5 @@ private:
     Clients clients;
     QHostAddress address;
     quint16 port;
+    QString authFile;
 };

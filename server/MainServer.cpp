@@ -1,4 +1,11 @@
+#include <QFile>
 #include "MainServer.h"
+
+const quint16 LOGIN_LENGTH_MIN = 4;
+const quint16 LOGIN_LENGTH_MAX = 16;
+const quint16 PASSWORD_LENGTH_MIN = 4;
+const quint16 PASSWORD_LENGTH_MAX = 16;
+const QString& DEFAULT_AUTH_FILE = "authorized";
 
 void Client::send( const QString& cmd )
 {
@@ -11,7 +18,8 @@ MainServer::MainServer():
     server( NULL ),
     timer( NULL ),
     address( QHostAddress::Any ),
-    port( DEFAULT_PORT )
+    port( DEFAULT_PORT ),
+    authFile( DEFAULT_AUTH_FILE )
 {
     server = new QTcpServer( this );
     connect(
@@ -27,7 +35,7 @@ void MainServer::parceCmdLine( const QStringList& arguments )
     for( int i = 1; i < arguments.count(); i++ )
     {
         if(
-            arguments.at(i).compare("--port") == 0 &&
+            arguments.at( i ).compare( "--port" ) == 0 &&
             i < arguments.count() - 1
         )
         {
@@ -45,12 +53,28 @@ void MainServer::parceCmdLine( const QStringList& arguments )
         }
 
         if(
-            arguments.at(i).compare("--address") == 0 &&
+            arguments.at( i ).compare( "--address" ) == 0 &&
             i < arguments.count() - 1
         )
         {
-            this->address.setAddress( arguments.at(i+1) );
+            this->address.setAddress( arguments.at(i + 1) );
             i++;
+            continue;
+        }
+
+        if(
+            arguments.at( i ).compare( "--authfile" ) == 0 &&
+            i < arguments.count() - 1
+        )
+        {
+
+            if( QFile::exists(arguments.at(i + 1)) )
+            {
+                this->authFile = arguments.at( i + 1 );
+                i++;
+                continue;
+            }
+            this->authFile.clear();
             continue;
         }
     }
@@ -140,15 +164,28 @@ bool MainServer::authorize( const QString& cmd, Clients::iterator client )
     {
         if( client->status == ST_CONNECTED )
         {
-            // TODO: check for version
             qDebug() << "Version: " << rx.cap( 1 );
+            if( rx.cap(1).toInt() != PROTOCOL_VERSION )
+            {
+                client->send( "wrongver:" );
+                client->socket->close();
+                return true;
+            }
 
             qDebug() << "Login: " << rx.cap( 2 );
             qDebug() << "Password: " << rx.cap( 3 );
-            client->status = ST_AUTHORIZED;
 
-            // TODO: take version from defines
-            client->send( "mbserver:1:" );
+            if( !checkUser(rx.cap(2), rx.cap(3)) )
+            {
+                client->send( "wronguser:" );
+                client->socket->close();
+                return true;
+            }
+
+            client->status = ST_AUTHORIZED;
+            client->send(
+                qPrintable( QString("mbserver:%1:").arg(PROTOCOL_VERSION) )
+            );
             return true;
         }
     }
@@ -263,4 +300,36 @@ void MainServer::connectTwoClients(
     SleeperThread sleeper;
     sleeper.msleep( 100 );
     client1->socket->write( "go:\n" );
+}
+
+bool MainServer::checkUser(
+    const QString& login,
+    const QString& password
+)
+{
+    if( !QFile::exists(authFile) )
+        return false;
+
+    QFile af( authFile );
+    if( !af.open(QFile::ReadOnly) )
+        return false;
+
+    QByteArray data;
+    QRegExp rx(
+        QString( "((\\d|\\w| ){%1,%2}):((\\d|\\w){%3,%4}):" )
+        .arg( LOGIN_LENGTH_MIN ).arg( LOGIN_LENGTH_MAX )
+        .arg( PASSWORD_LENGTH_MIN ).arg( PASSWORD_LENGTH_MAX )
+    );
+    while( !af.atEnd() )
+    {
+        data = af.readLine();
+        if(
+            rx.indexIn( data ) != -1 &&
+            login.compare( rx.cap(1) ) == 0 &&
+            password.compare( rx.cap(3) ) == 0
+        )
+            return true;
+    }
+
+    return false;
 }
