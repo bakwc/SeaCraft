@@ -1,14 +1,15 @@
-﻿    Сервер
-    
-Сервер обеспечивает поиск игроков, соединение двух игроков, обмен ударами между игроками, проверку корректности ходов.
+﻿    Server
+* searches for players
+* establishes connections between players
+* resends player's moves
+* checks correctness of moves
 
+    Client
+* user interface
+* API for palcing ships
+* connection to server and playing matches    
 
-    Клиент
-    
-Клиент обеспечивает пользовательский интерфейс, возможность расстановки кораблей, подключения к серверу и осуществлению матча.
-
-
-    Сеанс
+    Session
     
 > mbclient:1:SuperBot:119xoOlh%2:
 < mbserver:1:
@@ -34,19 +35,26 @@
 disconnect
 
 
-    Описание
+    Session's description
     
-1) Клиент посылает строку: mbclient:версия_протокола_клиента:логин:пароль (протокол - целое положительное число, логин — строка из латинских букв и цифр, пароль — строка из латинских букв, цифр, спецсимволов)
-2) Сервер посылает строку: mbserver:версия_протокола_сервера (целое положительное число)
-3) Клиент посылает строку: field:расставленные_корабли (1 — есть корабль, 0 — нет корабля, в порядке слева направо, сверху вниз)
-4) Сервер посылает команду found как только противник найден.
-5) Сервер посылает команду go, которая говорит, что клиенту необходимо сделать ход.
-6) Клиент посылает команду step:клетка_по_X:клетка_по_Y (нумерация клеток с нуля до 9 по обоим осям)
-7) Сервер посылает команду field2:информация_о_попадании:клетка_по_X:клетка_по_Y. Информация о попадании — один из трёх вариантов: miss – мимо, half – ранил, kill – убил. Информация о поле противника (попал ли игрок по противнику).
-8) Сервер посылает команду  field1:информация_о_попадании:клетка_по_X:клетка_по_Y. Информация о поле игрока (попал ли противник по игроку).
-9) По окончанию игры сервер посылает команду win или lose и разрывает соединение.
-10) В случае если противник покинул игру, сервер посылает команду diconnected: и разрывает соединение.
-11) В случае неверного запроса сервер посылает команду wrongcmd:
+1) Client says a string: ':mbclient:client_protocol_number:login:password:'
+  * protocol is a positive number
+  * login & password are strings of latin latters and digits, specific symbols
+2) Server says: 'mbserver:server_protocol_number:' (positive number)
+3) client says: 'field:ships_location:'
+  * 1 — ship is located here, 0 — no ship in this cell
+  * from left to right, from top to bottom
+4) Server says 'found:' if an opponent was found.
+5) Server says 'go:' if client should make a move.
+6) Client says 'step:cell_X:cell_Y:'
+  * cell_X,cell_y from >=0 and <= 9
+7) Server says 'field2:hits_info:cell_X:cell_Y:'.
+  * hits info --- one of three alternatives: miss, half – ship was hurted, kill – ship was died. 
+  This is an information did player hit some ships.
+8) Server says: 'field1:hits_info:cell_X:cell_Y:'. 
+9) After finishing a game server says 'win:' or 'lose:' and closes connection.
+10) In case of an opponen have lieaved the game server says 'diconnected:' and closes connection.
+11) In case of bad request server says 'wrongcmd:'
 
 
 
