@@ -12,6 +12,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = client
 TEMPLATE = app
 
+CONFIG += static
+
+static {
+CONFIG += static;
+DEFINES += STATIC; }
 
 SOURCES += main.cpp\
         mainwindow.cpp \

@@ -1,5 +1,7 @@
 #include <QApplication>
 #include "mainwindow.h"
+#include <QtPlugin>
+
 
 int main(int argc, char *argv[])
 {

@@ -250,6 +250,26 @@ bool MainServer::makeStep( const QString& cmd, Clients::iterator client )
                 client->playingWith->status = ST_WAITING_STEP;
                 client->send( response1 );
                 client->playingWith->send( response2 );
+
+                client->field.addKilledShip();
+                if (client->field.getKilledShips()>=20)
+                {
+                    client->send("win:");
+                    client->playingWith->send("lose:");
+                    client->socket->close();
+                    client->playingWith->socket->close();
+
+
+                    Clients::iterator client1=clients.
+                            find(client->socket->socketDescriptor());
+
+                    Clients::iterator client2=clients.
+                            find(client->playingWith->socket->socketDescriptor());
+
+                    clients.erase(client1);
+                    clients.erase(client2);
+                }
+
                 client->send( "go:" );
             }
 

@@ -8,6 +8,7 @@ void Field::initField( const QString& initData )
         i++
     )
         field.push_back( Cell(QString(*i).toInt()) );
+    killedShips = 0;
 }
 
 Cell Field::getCell( int x, int y ) const
@@ -90,4 +91,14 @@ bool Field::isShip(int size, int x, int y) const
     }
 
     return false;
+}
+
+int Field::getKilledShips()
+{
+    return killedShips;
+}
+
+void Field::addKilledShip()
+{
+    killedShips++;
 }

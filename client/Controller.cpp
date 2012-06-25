@@ -19,6 +19,7 @@ Controller::Controller(Model *model_):
         this, SLOT( onError(QAbstractSocket::SocketError) )
     );
 
+    disconnectStatus=DS_NONE;
 }
 
 void Controller::onMousePressed(const QPoint& pos)
@@ -60,6 +61,7 @@ void Controller::parseData(const QString& data)
 {
     parseGo(data);
     parseFields(data);
+    parseGameResult(data);
 }
 
 bool Controller::parseGo(const QString& data)
@@ -119,6 +121,29 @@ bool Controller::parseFields(const QString& data)
     return false;
 }
 
+bool Controller::parseGameResult(const QString& data)
+{
+    QRegExp rx("win:");
+    if (rx.indexIn(data)!=-1)
+        {
+            model->setState(ST_MAKING_STEP);
+            qDebug() << "We win!";
+            disconnectStatus=DS_WIN;
+            return true;
+        }
+
+    QRegExp rx2("lose:");
+    if (rx2.indexIn(data)!=-1)
+        {
+            model->setState(ST_MAKING_STEP);
+            qDebug() << "We lose!";
+            disconnectStatus=DS_LOSE;
+            return true;
+        }
+
+    return false;
+}
+
 void Controller::onGameStart()
 {
     if (!model->checkMyField())
@@ -174,6 +199,14 @@ void Controller::onError( QAbstractSocket::SocketError socketError )
 {
     Q_UNUSED( socketError );
     qDebug() << client->errorString();
+
+    if (disconnectStatus == DS_WIN)
+        QMessageBox::information( this, "Game result",
+            "You won!", QMessageBox::Ok, 0 );
+    else if (disconnectStatus == DS_LOSE)
+        QMessageBox::information( this, "Game result",
+            "You lose!", QMessageBox::Ok, 0 );
+    else
     QMessageBox::critical(
         this,
         tr("Connection Error"),

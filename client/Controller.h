@@ -8,6 +8,15 @@
 #include "Utility.h"
 #include "ConnectionInfoDialog.h"
 
+enum DisconnectStatus
+{
+    DS_WIN,
+    DS_LOSE,
+    DS_WRONG_FIELD,
+    DS_WRONG_LOGIN,
+    DS_NONE
+};
+
 class Controller: public QWidget
 {
     Q_OBJECT
@@ -25,10 +34,12 @@ private slots:
 private:
     void parseData(const QString& data);
     bool parseGo(const QString& data);
+    bool parseGameResult(const QString& data);
     bool parseFields(const QString& data);
 private:
     QTcpSocket *client;
     Model *model;
     QHostAddress serverAddress;
     quint16 serverPort;
+    DisconnectStatus disconnectStatus;
 };
