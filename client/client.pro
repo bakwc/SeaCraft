@@ -14,10 +14,6 @@ TEMPLATE = app
 
 CONFIG += static
 
-static {
-CONFIG += static;
-DEFINES += STATIC; }
-
 SOURCES += main.cpp\
         mainwindow.cpp \
     Field.cpp \
