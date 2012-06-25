@@ -50,7 +50,7 @@ void Statistics::load(const QString& fname)
 {
     if( !QFile::exists(fname) )
     {
-        qDebug() << "File not exists!";
+        qDebug() << "File with statistic does not exists!";
         return;
     }
 

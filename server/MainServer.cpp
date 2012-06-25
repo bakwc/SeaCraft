@@ -38,6 +38,7 @@ MainServer::~MainServer()
     stats.save(statFile);
 }
 
+// TODO: rewrite this function
 void MainServer::parceCmdLine( const QStringList& arguments )
 {
     for( int i = 1; i < arguments.count(); i++ )
@@ -75,7 +76,6 @@ void MainServer::parceCmdLine( const QStringList& arguments )
             i < arguments.count() - 1
         )
         {
-
             if( QFile::exists(arguments.at(i + 1)) )
             {
                 this->authFile = arguments.at( i + 1 );
@@ -83,6 +83,21 @@ void MainServer::parceCmdLine( const QStringList& arguments )
                 continue;
             }
             this->authFile.clear();
+            continue;
+        }
+
+        if(
+            arguments.at( i ).compare( "--statfile" ) == 0 &&
+            i < arguments.count() - 1
+        )
+        {
+            if( QFile::exists(arguments.at(i + 1)) )
+            {
+                this->statFile = arguments.at( i + 1 );
+                i++;
+                continue;
+            }
+            this->statFile.clear();
             continue;
         }
     }
@@ -290,6 +305,7 @@ bool MainServer::makeStep( const QString& cmd, Clients::iterator client )
 
 
             qDebug( "Making step" );
+
             return true;
         }
     }
