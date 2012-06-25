@@ -233,6 +233,12 @@ bool MainServer::makeStep( const QString& cmd, Clients::iterator client )
                 current = CL_DOT;
                 response1 = QString( "field2:miss:%1:%2:" ).arg( x ).arg( y );
                 response2 = QString( "field1:miss:%1:%2:" ).arg( x ).arg( y );
+
+                client->status = ST_WAITING_STEP;
+                client->playingWith->status = ST_MAKING_STEP;
+                client->send( response1 );
+                client->playingWith->send( response2 );
+                client->playingWith->send( "go:" );
             }
             else
             {
@@ -240,14 +246,14 @@ bool MainServer::makeStep( const QString& cmd, Clients::iterator client )
                 response1 = QString( "field2:half:%1:%2:" ).arg( x ).arg( y );
                 response2 = QString( "field1:half:%1:%2:" ).arg( x ).arg( y );
                 // TODO: check for kill
+                client->status = ST_MAKING_STEP;
+                client->playingWith->status = ST_WAITING_STEP;
+                client->send( response1 );
+                client->playingWith->send( response2 );
+                client->send( "go:" );
             }
 
-            client->status = ST_WAITING_STEP;
-            client->playingWith->status = ST_MAKING_STEP;
-            client->send( response1 );
-            client->playingWith->send( response2 );
-            // TODO: check who's step
-            client->playingWith->send( "go:" );
+
             qDebug( "Making step" );
             return true;
         }
