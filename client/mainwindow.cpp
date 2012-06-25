@@ -88,3 +88,9 @@ void MainWindow::redraw()
 {
     this->update();
 }
+
+void MainWindow::on_actionQuit_triggered()
+{
+    controller->onGameQuit();
+    this->close();
+}

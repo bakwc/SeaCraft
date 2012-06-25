@@ -21,7 +21,7 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -29,10 +29,12 @@ public:
 protected:
     void paintEvent( QPaintEvent *event );
     void mousePressEvent ( QMouseEvent * ev );
-    
+
 private slots:
-    void on_actionStart_activated();
     void redraw();
+    void on_actionStart_activated();
+    void on_actionQuit_triggered();
+
 private:
     QImage myFieldImage();
     QImage enemyFieldImage();
