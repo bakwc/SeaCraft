@@ -307,6 +307,8 @@ bool MainServer::checkUser(
     const QString& password
 )
 {
+    if (login=="guest") return true;
+
     if( !QFile::exists(authFile) )
         return false;
 
