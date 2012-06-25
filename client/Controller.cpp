@@ -89,6 +89,30 @@ bool Controller::parseFields(const QString& data)
                     model->setEnemyCell(rx.cap(3).toInt(),
                                         rx.cap(4).toInt(),
                                         CL_HALF);
+                if (rx.cap(2)=="kill")
+                    model->setEnemyCell(rx.cap(3).toInt(),
+                                        rx.cap(4).toInt(),
+                                        CL_SHIP);
+                if (rx.cap(2)=="miss")
+                    model->setEnemyCell(rx.cap(3).toInt(),
+                                        rx.cap(4).toInt(),
+                                        CL_DOT);
+            }
+
+            if (rx.cap(1)=="1")
+            {
+                if (rx.cap(2)=="half")
+                    model->setMyCell(rx.cap(3).toInt(),
+                                        rx.cap(4).toInt(),
+                                        CL_HALF);
+                if (rx.cap(2)=="kill")
+                    model->setMyCell(rx.cap(3).toInt(),
+                                        rx.cap(4).toInt(),
+                                        CL_SHIP);
+                if (rx.cap(2)=="miss")
+                    model->setMyCell(rx.cap(3).toInt(),
+                                        rx.cap(4).toInt(),
+                                        CL_DOT);
             }
             return true;
         }
