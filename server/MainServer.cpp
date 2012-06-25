@@ -6,6 +6,7 @@ const quint16 LOGIN_LENGTH_MAX = 16;
 const quint16 PASSWORD_LENGTH_MIN = 4;
 const quint16 PASSWORD_LENGTH_MAX = 16;
 const QString& DEFAULT_AUTH_FILE = "authorized";
+const QString& DEFAULT_STAT_FILE = "stats";
 
 void Client::send( const QString& cmd )
 {
@@ -19,7 +20,8 @@ MainServer::MainServer():
     timer( NULL ),
     address( QHostAddress::Any ),
     port( DEFAULT_PORT ),
-    authFile( DEFAULT_AUTH_FILE )
+    authFile( DEFAULT_AUTH_FILE ),
+    statFile( DEFAULT_STAT_FILE )
 {
     server = new QTcpServer( this );
     connect(
@@ -28,6 +30,12 @@ MainServer::MainServer():
         this,
         SLOT( onNewUserConnected() )
     );
+    stats.load(statFile);
+}
+
+MainServer::~MainServer()
+{
+    stats.save(statFile);
 }
 
 void MainServer::parceCmdLine( const QStringList& arguments )
@@ -183,6 +191,7 @@ bool MainServer::authorize( const QString& cmd, Clients::iterator client )
             }
 
             client->status = ST_AUTHORIZED;
+            client->login = rx.cap( 2 );
             client->send(
                 qPrintable( QString("mbserver:%1:").arg(PROTOCOL_VERSION) )
             );
@@ -252,10 +261,16 @@ bool MainServer::makeStep( const QString& cmd, Clients::iterator client )
                 client->playingWith->send( response2 );
 
                 client->field.addKilledShip();
-                if (client->field.getKilledShips()>=20)
+                if (client->field.getKilledShips()>=20) // On game end, TODO: to seporate function
                 {
                     client->send("win:");
                     client->playingWith->send("lose:");
+
+                    stats.playerWon(client->login);
+                    stats.playerLost(client->playingWith->login);
+
+                    stats.save(statFile);
+
                     client->socket->close();
                     client->playingWith->socket->close();
 

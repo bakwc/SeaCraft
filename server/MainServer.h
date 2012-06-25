@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QThread>
 #include "Field.h"
+#include "Statistics.h"
 
 const quint16 DEFAULT_PORT = 1234;
 const quint16 DEFAULT_SEARCH_INTERVAL = 3000;
@@ -24,15 +25,6 @@ enum ClientStatus
     ST_MAKING_STEP
 };
 
-struct ClientInfo
-{
-    QString login;
-    quint32 gamesPlayed;
-    quint32 numberOfWins;
-    quint32 numberOfLooses;
-    quint32 numberOfEscapes;
-};
-
 struct Client
 {
     QTcpSocket* socket;
@@ -40,7 +32,7 @@ struct Client
     QMap<int, Client>::iterator playingWith;
     void send( const QString& cmd );
     Field field;
-    ClientInfo statistic;
+    QString login;
 };
 
 typedef QMap<int, Client> Clients;
@@ -50,6 +42,7 @@ class MainServer: public QObject
     Q_OBJECT
 public:
     MainServer();
+    ~MainServer();
     bool spawn();
     bool spawn(
         const QHostAddress& address,
@@ -79,6 +72,8 @@ private:
     QTimer* timer;
     Clients clients;
     QHostAddress address;
+    Statistics stats;
     quint16 port;
     QString authFile;
+    QString statFile;
 };
