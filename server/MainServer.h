@@ -15,15 +15,6 @@ const quint16 DEFAULT_PORT = 1234;
 const quint16 DEFAULT_SEARCH_INTERVAL = 3000;
 const quint16 PROTOCOL_VERSION = 1;
 
-class SleeperThread : public QThread
-{
-public:
-    static void msleep( unsigned long msecs )
-    {
-        QThread::msleep( msecs );
-    }
-};
-
 enum ClientStatus
 {
     ST_CONNECTED = 0,

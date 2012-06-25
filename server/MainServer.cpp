@@ -262,7 +262,7 @@ bool MainServer::placeShips( const QString& ships, Clients::iterator client )
         return false;
 
     client->field.initField( ships );
-    return true;
+    return client->field.checkField();
 }
 
 void MainServer::onTimer()
@@ -296,9 +296,6 @@ void MainServer::connectTwoClients(
     client2->playingWith = client1;
     client1->socket->write( "found:\n" );
     client2->socket->write( "found:\n" );
-    client1->socket->flush();
-    SleeperThread sleeper;
-    sleeper.msleep( 100 );
     client1->socket->write( "go:\n" );
 }
 

@@ -15,9 +15,13 @@ class Field
 {
 public:
     void initField(const QString& initData);
-    Cell getCell(int x, int y);
+    Cell getCell(int x, int y) const;
     void setCell(int x, int y, Cell cell);
     static bool isFieldCorrect(const QString& fieldstr);
+    bool checkField();
+private:
+    int shipNum(int size) const;
+    bool isShip(int size, int x, int y) const;
 private:
     QVector<Cell> field;
 };
