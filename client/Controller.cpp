@@ -185,11 +185,12 @@ void Controller::onGameStart()
     client->connectToHost( serverAddress, serverPort );
 }
 
-void Controller::on_actionDisconnect_triggered()
+void Controller::onGameQuit()
 {
     if( client->state() == QAbstractSocket::ConnectedState )
     {
         qDebug() << "Disconnecting from host";
+        // TODO: send to server information about quiting from game
         client->disconnectFromHost();
         model->setState(ST_PLACING_SHIPS);
     }

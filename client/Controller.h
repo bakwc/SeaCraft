@@ -24,13 +24,13 @@ public:
     Controller(Model *model_);
     void onMousePressed(const QPoint& position);
     void onGameStart();
+    void onGameQuit();
 signals:
     void stateChanged();
 private slots:
     void onDataReceived();
     void onConnected();
     void onError( QAbstractSocket::SocketError socketError );
-    void on_actionDisconnect_triggered();
 private:
     void parseData(const QString& data);
     bool parseGo(const QString& data);
