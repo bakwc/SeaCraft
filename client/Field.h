@@ -19,6 +19,7 @@ public:
     Cell getCell(int x, int y);
     void setCell(int x, int y, Cell cell);
     QString getField();
+    void clear();
 private:
     QVector<Cell> field;
 };

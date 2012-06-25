@@ -196,6 +196,15 @@ void Controller::onGameQuit()
     }
 }
 
+void Controller::clearFields()
+{
+    if( model->getState() != ST_PLACING_SHIPS )
+        return;
+
+    model->clearEnemyField();
+    model->clearMyField();
+}
+
 void Controller::onError( QAbstractSocket::SocketError socketError )
 {
     Q_UNUSED( socketError );

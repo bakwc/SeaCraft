@@ -43,7 +43,14 @@
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
+   <widget class="QMenu" name="menuField">
+    <property name="title">
+     <string>Field</string>
+    </property>
+    <addaction name="actionClear"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuField"/>
   </widget>
   <action name="actionStart">
    <property name="text">
@@ -53,6 +60,11 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>Clear</string>
    </property>
   </action>
  </widget>
