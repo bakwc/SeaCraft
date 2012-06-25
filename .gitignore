@@ -5,6 +5,7 @@ client/debug*/
 client/release*/
 client/object_script*
 
+server/stats
 server-*/
 server/debug*/
 server/release*/
