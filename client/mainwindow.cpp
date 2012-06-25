@@ -94,3 +94,9 @@ void MainWindow::on_actionQuit_triggered()
     controller->onGameQuit();
     this->close();
 }
+
+void MainWindow::on_actionClear_triggered()
+{
+    controller->clearFields();
+    this->update();
+}

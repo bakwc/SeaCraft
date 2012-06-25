@@ -25,6 +25,7 @@ public:
     void onMousePressed(const QPoint& position);
     void onGameStart();
     void onGameQuit();
+    void clearFields();
 signals:
     void stateChanged();
 private slots:

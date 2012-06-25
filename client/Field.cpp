@@ -2,7 +2,7 @@
 
 Field::Field()
 {
-    field.fill(CL_CLEAR,100);
+    clear();
 }
 
 Field::~Field()
@@ -36,4 +36,9 @@ QString Field::getField()
         if (*i==CL_CLEAR) result+="0";
         else result+="1";
     return result;
+}
+
+void Field::clear()
+{
+    field.fill(CL_CLEAR,100);
 }

@@ -29,6 +29,8 @@ public:
     QString getLogin() const;
     QString getPassword() const;
     bool checkMyField() const;
+    void clearEnemyField();
+    void clearMyField();
 private:
     int shipNum(int size) const;
     bool isShip(int size, int x, int y) const;

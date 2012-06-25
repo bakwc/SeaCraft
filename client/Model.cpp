@@ -125,3 +125,13 @@ bool Model::isShip(int size, int x, int y) const
 
     return false;
 }
+
+void Model::clearEnemyField()
+{
+    enemyField->clear();
+}
+
+void Model::clearMyField()
+{
+    myField->clear();
+}

@@ -34,6 +34,7 @@ private slots:
     void redraw();
     void on_actionStart_activated();
     void on_actionQuit_triggered();
+    void on_actionClear_triggered();
 
 private:
     QImage myFieldImage();
