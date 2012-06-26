@@ -26,6 +26,7 @@ public:
     void onGameStart();
     void onGameQuit();
     void clearFields();
+    State getState() const;
 signals:
     void stateChanged();
 private slots:

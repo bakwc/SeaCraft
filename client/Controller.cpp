@@ -248,3 +248,8 @@ void Controller::onConnected()
     //client->waitForReadyRead();
     //clientStream >> response;
 }
+
+State Controller::getState() const
+{
+    return model->getState();
+}

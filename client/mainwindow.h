@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include <QDebug>
 #include <QtNetwork/QTcpSocket>
+#include <QString>
 #include "Images.h"
 #include "Model.h"
 #include "Controller.h"
@@ -35,6 +36,8 @@ private slots:
     void on_actionStart_activated();
     void on_actionQuit_triggered();
     void on_actionClear_triggered();
+private:
+    void setStatus(const QString& status);
 
 private:
     QImage myFieldImage();

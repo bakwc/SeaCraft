@@ -8,6 +8,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     pictures = new Images;
     pictures->load();
+
+    ui->label->setStyleSheet(
+                "QLabel { color : #00157f; }");
     model = new Model;
     controller = new Controller(model);
     connect(controller,SIGNAL(stateChanged()),this,SLOT(redraw()));
@@ -21,6 +24,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::setStatus(const QString& status)
+{
+    ui->label->setText("Status: "+status);
+}
+
 void MainWindow::paintEvent( QPaintEvent *event )
 {
     QPainter painter(this);
@@ -29,6 +37,18 @@ void MainWindow::paintEvent( QPaintEvent *event )
 
     painter.drawImage(MYFIELD_X, MYFIELD_Y, myFieldImage());
     painter.drawImage(ENEMYFIELD_X, ENEMYFIELD_Y, enemyFieldImage());
+    switch (controller->getState())
+    {
+    case ST_PLACING_SHIPS:
+        setStatus("placing ships");
+        break;
+    case ST_MAKING_STEP:
+        setStatus("your step");
+        break;
+    case ST_WAITING_STEP:
+        setStatus("wait for enemy");
+        break;
+    }
 }
 
 QImage MainWindow::myFieldImage()
