@@ -16,6 +16,7 @@ public:
     explicit ConnectionInfoDialog( QWidget* parent = 0 );
     ~ConnectionInfoDialog();
 
+    void setAddressString( const QString& address, quint16 port );
     void setAddressString( const QHostAddress& address, quint16 port );
     QString getAddress() const;
     QString getLogin() const;

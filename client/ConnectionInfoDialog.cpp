@@ -1,5 +1,8 @@
 #include "ConnectionInfoDialog.h"
 
+const QString DEFAULT_LOGIN = "guest";
+const QString DEFAULT_PASSWORD = "guest";
+
 ConnectionInfoDialog::ConnectionInfoDialog( QWidget* parent ):
     QDialog( parent )
 {
@@ -34,8 +37,8 @@ ConnectionInfoDialog::ConnectionInfoDialog( QWidget* parent ):
     loginLabel->setText(tr("Login:"));
     passLabel->setText(tr("Pass:"));
 
-    loginTextBox->setText(tr("guest"));
-    passTextBox->setText(tr("guest"));
+    loginTextBox->setText( DEFAULT_LOGIN );
+    passTextBox->setText( DEFAULT_PASSWORD );
 
     passTextBox->setEchoMode(QLineEdit::Password);
 
@@ -51,6 +54,14 @@ ConnectionInfoDialog::ConnectionInfoDialog( QWidget* parent ):
 
 ConnectionInfoDialog::~ConnectionInfoDialog()
 {
+}
+
+void ConnectionInfoDialog::setAddressString(
+    const QString& address,
+    quint16 port
+)
+{
+    setAddressString( QHostAddress(address), port );
 }
 
 void ConnectionInfoDialog::setAddressString(
