@@ -31,22 +31,29 @@ void MainWindow::setStatus(const QString& status)
 
 void MainWindow::paintEvent( QPaintEvent *event )
 {
-    QPainter painter(this);
-    painter.drawImage(0,this->menuBar()->geometry().height(),
-                      pictures->get("field"));
+    Q_UNUSED( event );
 
-    painter.drawImage(MYFIELD_X, MYFIELD_Y, myFieldImage());
-    painter.drawImage(ENEMYFIELD_X, ENEMYFIELD_Y, enemyFieldImage());
-    switch (controller->getState())
+    const int deltaY = this->centralWidget()->y();
+
+    QPainter painter( this );
+    painter.drawImage(
+        0,
+        deltaY,
+        pictures->get( "field" )
+    );
+
+    painter.drawImage( MYFIELD_X, MYFIELD_Y + deltaY, myFieldImage() );
+    painter.drawImage( ENEMYFIELD_X, ENEMYFIELD_Y + deltaY, enemyFieldImage() );
+    switch( controller->getState() )
     {
     case ST_PLACING_SHIPS:
-        setStatus("placing ships");
+        setStatus( "placing ships" );
         break;
     case ST_MAKING_STEP:
-        setStatus("your step");
+        setStatus( "your step" );
         break;
     case ST_WAITING_STEP:
-        setStatus("wait for enemy");
+        setStatus( "wait for enemy" );
         break;
     }
 }
@@ -92,11 +99,11 @@ QImage MainWindow::getFieldImage(char fld)
     return image;
 }
 
-
 void MainWindow::mousePressEvent(QMouseEvent * ev)
 {
     QPoint pos=ev->pos();
-    controller->onMousePressed(pos);
+    pos.setY( pos.y() - this->centralWidget()->y() );
+    controller->onMousePressed( pos );
 }
 
 void MainWindow::on_actionStart_activated()
