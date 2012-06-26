@@ -8,13 +8,20 @@
 #include "Utility.h"
 #include "ConnectionInfoDialog.h"
 
-enum DisconnectStatus
+enum GameResult
 {
-    DS_WIN,
-    DS_LOSE,
-    DS_WRONG_FIELD,
-    DS_WRONG_LOGIN,
-    DS_NONE
+    GR_NONE = 0,
+    GR_WON = 1,
+    GR_LOST = -1
+};
+
+enum GameErrorMessage
+{
+    GEM_UNKNOWN = -1,
+    GEM_NONE = 0,
+    GEM_ALREADY_CONNECTED,
+    GEM_WRONG_FIELD,
+    GEM_WRONG_USER
 };
 
 class Controller: public QWidget
@@ -27,21 +34,35 @@ public:
     void onGameQuit();
     void clearFields();
     State getState() const;
+    void setConnectionInfo(
+        const QString& address,
+        quint16 port,
+        const QString& login,
+        const QString& password
+    );
+    QString getServerAddress() const;
+    quint16 getServerPort() const;
+    QString getUserLogin() const;
+
 signals:
     void stateChanged();
+    void gameResult( GameResult result );
+    void gameError( GameErrorMessage message );
+
 private slots:
     void onDataReceived();
     void onConnected();
     void onError( QAbstractSocket::SocketError socketError );
+
 private:
     void parseData(const QString& data);
     bool parseGo(const QString& data);
     bool parseGameResult(const QString& data);
     bool parseFields(const QString& data);
+
 private:
     QTcpSocket *client;
     Model *model;
     QHostAddress serverAddress;
     quint16 serverPort;
-    DisconnectStatus disconnectStatus;
 };

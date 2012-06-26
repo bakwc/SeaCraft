@@ -18,8 +18,6 @@ Controller::Controller(Model *model_):
         client, SIGNAL( error(QAbstractSocket::SocketError) ),
         this, SLOT( onError(QAbstractSocket::SocketError) )
     );
-
-    disconnectStatus=DS_NONE;
 }
 
 void Controller::onMousePressed(const QPoint& pos)
@@ -128,7 +126,7 @@ bool Controller::parseGameResult(const QString& data)
         {
             model->setState(ST_MAKING_STEP);
             qDebug() << "We win!";
-            disconnectStatus=DS_WIN;
+            emit gameResult( GR_WON );
             return true;
         }
 
@@ -137,7 +135,7 @@ bool Controller::parseGameResult(const QString& data)
         {
             model->setState(ST_MAKING_STEP);
             qDebug() << "We lose!";
-            disconnectStatus=DS_LOSE;
+            emit gameResult( GR_LOST );
             return true;
         }
 
@@ -146,40 +144,23 @@ bool Controller::parseGameResult(const QString& data)
 
 void Controller::onGameStart()
 {
-    if (!model->checkMyField())
+    if( !model->checkMyField() )
     {
-        QMessageBox::information(this,"Connection Info",
-                             "Wrong ships placement!", QMessageBox::Ok, 0);
+        emit gameError( GEM_WRONG_FIELD );
         return;
     }
 
     if( client->state() == QAbstractSocket::ConnectedState )
     {
-        QMessageBox::information( this, "Connection Info",
-            "Already connected", QMessageBox::Ok, 0 );
+        emit gameError( GEM_ALREADY_CONNECTED );
         return;
     }
-
-    ConnectionInfoDialog* connectionDialog = new ConnectionInfoDialog( this );
-
-
-    connectionDialog->setAddressString( serverAddress, serverPort );
-    connectionDialog->setModal( true );
-    if( connectionDialog->exec() != QDialog::Accepted )
-    {
-        qDebug() << "ConnectionDialog::rejected";
-        return;
-    }
-
-    serverAddress = connectionDialog->getAddress();
-    serverPort = connectionDialog->getPort();
-    model->setLogin(connectionDialog->getLogin());
-    model->setPassword(connectionDialog->getPassword());
 
     qDebug(
-        "Connected to host %s:%d",
+        "Connected to host %s:%d as %s",
         qPrintable( serverAddress.toString() ),
-        serverPort
+        serverPort,
+        qPrintable( model->getLogin() )
     );
 
     client->connectToHost( serverAddress, serverPort );
@@ -209,19 +190,6 @@ void Controller::onError( QAbstractSocket::SocketError socketError )
 {
     Q_UNUSED( socketError );
     qDebug() << client->errorString();
-
-    if (disconnectStatus == DS_WIN)
-        QMessageBox::information( this, "Game result",
-            "You won!", QMessageBox::Ok, 0 );
-    else if (disconnectStatus == DS_LOSE)
-        QMessageBox::information( this, "Game result",
-            "You lose!", QMessageBox::Ok, 0 );
-    else
-    QMessageBox::critical(
-        this,
-        tr("Connection Error"),
-        client->errorString()
-    );
 }
 
 void Controller::onConnected()
@@ -242,14 +210,37 @@ void Controller::onConnected()
 
     qDebug() << request;
     model->setState(ST_WAITING_STEP);
-
-    //clientStream << ; // TODO: login+pass
-    //
-    //client->waitForReadyRead();
-    //clientStream >> response;
 }
 
 State Controller::getState() const
 {
     return model->getState();
+}
+
+void Controller::setConnectionInfo(
+    const QString& address,
+    quint16 port,
+    const QString& login,
+    const QString& password
+)
+{
+    serverAddress = QHostAddress( address );
+    serverPort = port;
+    model->setLogin( login );
+    model->setPassword( password );
+}
+
+QString Controller::getServerAddress() const
+{
+    return serverAddress.toString();
+}
+
+quint16 Controller::getServerPort() const
+{
+    return serverPort;
+}
+
+QString Controller::getUserLogin() const
+{
+    return model->getLogin();
 }

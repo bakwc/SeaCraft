@@ -28,14 +28,17 @@ public:
     ~MainWindow();
 
 protected:
-    void paintEvent( QPaintEvent *event );
-    void mousePressEvent ( QMouseEvent * ev );
+    void paintEvent( QPaintEvent* event );
+    void mousePressEvent ( QMouseEvent* ev );
 
 private slots:
     void redraw();
+    void showGameResult( GameResult result );
+    void showGameError( GameErrorMessage message );
     void on_actionStart_activated();
     void on_actionQuit_triggered();
     void on_actionClear_triggered();
+
 private:
     void setStatus(const QString& status);
 
@@ -43,6 +46,7 @@ private:
     QImage myFieldImage();
     QImage enemyFieldImage();
     QImage getFieldImage(char);
+
 private:
     Ui::MainWindow *ui;
     Images *pictures;

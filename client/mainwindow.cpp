@@ -9,11 +9,23 @@ MainWindow::MainWindow(QWidget *parent) :
     pictures = new Images;
     pictures->load();
 
-    ui->label->setStyleSheet(
-                "QLabel { color : #00157f; }");
+    ui->label->setStyleSheet( "QLabel { color : #00157f; }" );
     model = new Model;
     controller = new Controller(model);
-    connect(controller,SIGNAL(stateChanged()),this,SLOT(redraw()));
+
+    connect( controller, SIGNAL(stateChanged()), this, SLOT(redraw()) );
+    connect(
+        controller,
+        SIGNAL( gameResult(GameResult) ),
+        this,
+        SLOT( showGameResult(GameResult) )
+    );
+    connect(
+        controller,
+        SIGNAL( gameError(GameErrorMessage) ),
+        this,
+        SLOT( showGameError(GameErrorMessage) )
+    );
 }
 
 MainWindow::~MainWindow()
@@ -108,6 +120,26 @@ void MainWindow::mousePressEvent(QMouseEvent * ev)
 
 void MainWindow::on_actionStart_activated()
 {
+    ConnectionInfoDialog* connectionDialog = new ConnectionInfoDialog( this );
+
+    connectionDialog->setModal( true );
+    connectionDialog->setAddressString(
+        controller->getServerAddress(),
+        controller->getServerPort()
+    );
+
+    if( connectionDialog->exec() != QDialog::Accepted )
+    {
+        qDebug() << "ConnectionDialog::rejected";
+        return;
+    }
+
+    controller->setConnectionInfo(
+        connectionDialog->getAddress(),
+        connectionDialog->getPort(),
+        connectionDialog->getLogin(),
+        connectionDialog->getPassword()
+    );
     controller->onGameStart();
 }
 
@@ -126,4 +158,40 @@ void MainWindow::on_actionClear_triggered()
 {
     controller->clearFields();
     this->update();
+}
+
+void MainWindow::showGameResult( GameResult result )
+{
+    if( result == GR_NONE )
+        return;
+
+    QString messageString = result == GR_WON
+        ? tr( "You win!" )
+        : tr( "You lose!" );
+
+    this->update();
+    QMessageBox::information( this, tr("Game result"), messageString );
+}
+
+void MainWindow::showGameError( GameErrorMessage message )
+{
+    QString messageString;
+
+    switch( message )
+    {
+    case GEM_WRONG_FIELD:
+        messageString = tr( "Wrong ships placement!" );
+        break;
+    case GEM_WRONG_USER:
+        messageString = tr( "Wrong user passed!" );
+        break;
+    case GEM_ALREADY_CONNECTED:
+        messageString = tr( "You are already connected!" );
+        break;
+    default:
+        return;
+    }
+
+    this->update();
+    QMessageBox::information( this, tr("Game Info"), messageString );
 }
