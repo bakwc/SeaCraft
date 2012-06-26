@@ -29,7 +29,7 @@ class Controller: public QWidget
     Q_OBJECT
 public:
     Controller(Model *model_);
-    void onMousePressed(const QPoint& position);
+    void onMousePressed(const QPoint& position, bool setShip = true);
     void onGameStart();
     void onGameQuit();
     void clearFields();

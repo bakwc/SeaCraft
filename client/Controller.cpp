@@ -20,39 +20,47 @@ Controller::Controller(Model *model_):
     );
 }
 
-void Controller::onMousePressed(const QPoint& pos)
+void Controller::onMousePressed(const QPoint& pos, bool setShip)
 {
-    if (model->getState()==ST_PLACING_SHIPS)
+    if( model->getState() == ST_PLACING_SHIPS )
     {
-        QPoint point=getMyFieldCoord(pos);
-        if (point.x()==-1) return;
+        QPoint point = getMyFieldCoord( pos );
+
+        if( point.x() == -1 )
+            return;
+
         qDebug() << "Ship at" << point.x() << point.y();
-        model->setMyCell(point.x(),point.y(),CL_SHIP);
-        stateChanged();
+        model->setMyCell( point.x(), point.y(), setShip ? CL_SHIP : CL_CLEAR );
+        emit stateChanged();
+        return;
     }
-    else if (model->getState()==ST_MAKING_STEP)
+
+    if( model->getState() == ST_MAKING_STEP )
     {
-        QPoint point=getEnemyFieldCoord(pos);
-        if (point.x()==-1) return;
+        QPoint point = getEnemyFieldCoord( pos );
+        if( point.x() == -1 )
+            return;
+
         qDebug() << "Going to" << point.x() << point.y();
-        model->setEnemyCell(point.x(),point.y(),CL_DOT);
+        model->setEnemyCell( point.x(), point.y(), CL_DOT );
 
         QString cmd;
-        cmd = QString("step:%1:%2:").arg(point.x()).arg(point.y());
+        cmd = QString( "step:%1:%2:" ).arg( point.x() ).arg( point.y() );
         qDebug () << cmd;
-        client->write(cmd.toLocal8Bit());
-        model->setState(ST_WAITING_STEP);
-        stateChanged();
+        client->write( cmd.toLocal8Bit() );
+        model->setState( ST_WAITING_STEP );
+        emit stateChanged();
+        return;
     }
 }
 
 void Controller::onDataReceived()
 {
     QString data;
-    data=client->readAll();
+    data = client->readAll();
     qDebug() << "Data:" << data;
-    parseData(data);
-    stateChanged();
+    parseData( data );
+    emit stateChanged();
 }
 
 void Controller::parseData(const QString& data)

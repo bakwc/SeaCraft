@@ -113,9 +113,9 @@ QImage MainWindow::getFieldImage(char fld)
 
 void MainWindow::mousePressEvent(QMouseEvent * ev)
 {
-    QPoint pos=ev->pos();
+    QPoint pos = ev->pos();
     pos.setY( pos.y() - this->centralWidget()->y() );
-    controller->onMousePressed( pos );
+    controller->onMousePressed( pos, ev->button() == Qt::LeftButton );
 }
 
 void MainWindow::on_actionStart_activated()
