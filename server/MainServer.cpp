@@ -361,7 +361,8 @@ bool MainServer::checkUser(
     const QString& password
 )
 {
-    if (login=="guest") return true;
+    if( login == "guest" )
+        return true;
 
     if( !QFile::exists(authFile) )
     {
@@ -377,66 +378,39 @@ bool MainServer::checkUser(
     }
 
     QByteArray data;
-    /*
     QRegExp rx(
         QString( "((\\d|\\w| ){%1,%2}):((\\d|\\w){%3,%4}):" )
         .arg( LOGIN_LENGTH_MIN ).arg( LOGIN_LENGTH_MAX )
         .arg( PASSWORD_LENGTH_MIN ).arg( PASSWORD_LENGTH_MAX )
-    );*/
-
-    //QRegExp rx("(\\w):(\\*):");
+    );
 
     while( !af.atEnd() )
     {
         data = af.readLine();
 
-        qDebug() << "String readed:"<<data;
-        QList<QByteArray> list=data.split(':');
+        if( rx.indexIn( data ) == -1 )
+            continue;
 
-        if (list.size()<2) continue;
-
-        qDebug() << "Login and pass:";
-        qDebug() << list[0];
-        qDebug() << list[1];
-
-        if (list[0]==login)
+        if( login.compare(rx.cap(1)) == 0 )
         {
-            if (list[1]==password)
-            {
+            af.close();
+
+            if( password.compare(rx.cap(3)) == 0 )
                 return true;
-            }
+
             return false;
         }
-
-        /*
-        if (rx.indexIn( data ) != -1 &&
-                login.compare(rx.cap(1))==0)
-        {
-                qDebug() << "Reg exps:";
-                qDebug() << rx.cap(1);
-                qDebug() << rx.cap(2);
-                qDebug() << rx.cap(3);
-            if (password.compare( rx.cap(2) ) == 0)
-                return true;
-            else return false;
-        }
-        */
     }
+    af.close();
 
-
-    QFile addf( authFile );
-    if( !addf.open(QFile::Append) )
+    if( !af.open(QFile::Append) )
     {
         qDebug() << "Unable to open auth file";
         return false;
     }
 
-    QTextStream out(&addf);
-
-    out << QString("%1:%2:\n")
-           .arg(login)
-           .arg(password);
-    addf.close();
+    af.write( qPrintable(QString("%1:%2:\n").arg(login).arg(password)) );
+    af.close();
 
     return true;
 }
