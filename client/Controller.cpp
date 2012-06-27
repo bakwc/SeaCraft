@@ -35,7 +35,7 @@ Controller::Controller(Model *model_):
             return;
 
     QByteArray line;
-    QRegExp rx("(\\w+):(\\d+):(\\w+):(.+):");
+    QRegExp rx("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+):(\\w+):(.+):");
     while( !af.atEnd() )
     {
         line = af.readLine();
