@@ -209,22 +209,22 @@ bool Controller::parseGameResult(const QString& data)
     QRegExp rx("win:");
     if (rx.indexIn(data)!=-1)
         {
+            qDebug() << "We win!";
+            emit gameResult( GR_WON );
             model->setState(ST_PLACING_SHIPS);
             model->clearMyField();
             model->clearEnemyField();
-            qDebug() << "We win!";
-            emit gameResult( GR_WON );
             return true;
         }
 
     QRegExp rx2("lose:");
     if (rx2.indexIn(data)!=-1)
         {
+            qDebug() << "We lose!";
+            emit gameResult( GR_LOST );
             model->setState(ST_PLACING_SHIPS);
             model->clearMyField();
             model->clearEnemyField();
-            qDebug() << "We lose!";
-            emit gameResult( GR_LOST );
             return true;
         }
 
