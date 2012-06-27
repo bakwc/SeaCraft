@@ -1,3 +1,4 @@
+#include <QEvent>
 #include "ConnectionInfoDialog.h"
 
 const QString DEFAULT_LOGIN = "guest";
@@ -47,9 +48,11 @@ ConnectionInfoDialog::ConnectionInfoDialog( QWidget* parent ):
 
     applyButton->setDefault( true );
 
+    loginTextBox->installEventFilter( this );
+    passTextBox->installEventFilter( this );
+
     connect( applyButton, SIGNAL(clicked()), this, SLOT(accept()) );
     connect( cancelButton, SIGNAL(clicked()), this, SLOT(reject()) );
-
 }
 
 ConnectionInfoDialog::~ConnectionInfoDialog()
@@ -75,6 +78,11 @@ void ConnectionInfoDialog::setAddressString(
     addressTextBox->setText(
         QString("%1:%2").arg(address.toString()).arg(port)
     );
+}
+
+void ConnectionInfoDialog::setLogin( const QString& login )
+{
+    loginTextBox->setText( login );
 }
 
 QString ConnectionInfoDialog::getAddress() const
@@ -125,4 +133,26 @@ void ConnectionInfoDialog::accept()
     );
 
     addressTextBox->setFocus();
+}
+
+bool ConnectionInfoDialog::eventFilter( QObject* object, QEvent* event )
+{
+    if( event->type() == QEvent::MouseButtonPress )
+    {
+        if( object == loginTextBox )
+        {
+            loginTextBox->selectAll();
+            return true;
+        }
+
+        if( object == passTextBox )
+        {
+            passTextBox->selectAll();
+            return true;
+        }
+
+        return false;
+    }
+
+    return QDialog::eventFilter( object, event );
 }

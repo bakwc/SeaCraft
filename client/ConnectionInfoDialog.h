@@ -18,6 +18,7 @@ public:
 
     void setAddressString( const QString& address, quint16 port );
     void setAddressString( const QHostAddress& address, quint16 port );
+    void setLogin( const QString& login );
     QString getAddress() const;
     QString getLogin() const;
     QString getPassword() const;
@@ -25,6 +26,9 @@ public:
 
 public slots:
     void accept();
+
+protected:
+    bool eventFilter( QObject* object, QEvent* event);
 
 private:
     QLineEdit* addressTextBox;
