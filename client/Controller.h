@@ -4,6 +4,8 @@
 #include <QTcpSocket>
 #include <QRegExp>
 #include <QMessageBox>
+#include <QFile>
+#include <QRegExp>
 #include "Model.h"
 #include "Utility.h"
 #include "ConnectionInfoDialog.h"
@@ -29,6 +31,7 @@ class Controller: public QWidget
     Q_OBJECT
 public:
     Controller(Model *model_);
+    ~Controller();
     void onMousePressed(const QPoint& position, bool setShip = true);
     void onGameStart();
     void onGameQuit();

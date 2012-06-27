@@ -1,5 +1,7 @@
 #include "Controller.h"
 
+const QString& DEFAULT_CONFIG_FILE = "config.ini";
+
 Controller::Controller(Model *model_):
     model(model_),
     serverAddress( QHostAddress::LocalHost ),
@@ -18,6 +20,43 @@ Controller::Controller(Model *model_):
         client, SIGNAL( error(QAbstractSocket::SocketError) ),
         this, SLOT( onError(QAbstractSocket::SocketError) )
     );
+
+
+    // TODO: Move to seporate function
+
+    if( !QFile::exists(DEFAULT_CONFIG_FILE) )
+        {
+            qDebug() << "Config file does not exists!";
+            return;
+        }
+
+    QFile af(DEFAULT_CONFIG_FILE);
+        if( !af.open(QFile::ReadOnly) )
+            return;
+
+    QByteArray line;
+    QRegExp rx("(\\w+):(\\d+):(\\w+):(.+):");
+    while( !af.atEnd() )
+    {
+        line = af.readLine();
+        if(rx.indexIn( line ) == -1) continue;
+        serverAddress=rx.cap(1);
+        serverPort=rx.cap(2).toInt();
+    }
+}
+
+Controller::~Controller()
+{           // TODO: move to seporate function
+    QFile file(DEFAULT_CONFIG_FILE);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    QTextStream out(&file);
+    out << QString("%1:%2:%3:%4:\n")
+           .arg(serverAddress.toString())
+           .arg(serverPort)
+           .arg(model->getLogin())
+           .arg(model->getPassword())
+           ;
+    file.close();
 }
 
 void Controller::onMousePressed(const QPoint& pos, bool setShip)
