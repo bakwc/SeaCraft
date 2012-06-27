@@ -255,6 +255,9 @@ void Controller::clearFields()
 
 void Controller::randomField()
 {
+    if( model->getState() != ST_PLACING_SHIPS )
+        return;
+
     model->clearMyField();
 
     for( int i = 1, k = 4; i <= 4; i++, k-- )
