@@ -425,7 +425,7 @@ bool MainServer::checkUser(
 
 
     QFile addf( authFile );
-    if( !addf.open(QFile::ReadOnly) )
+    if( !addf.open(QFile::Append) )
     {
         qDebug() << "Unable to open auth file";
         return false;

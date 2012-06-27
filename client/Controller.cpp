@@ -187,7 +187,9 @@ bool Controller::parseGameResult(const QString& data)
     QRegExp rx("win:");
     if (rx.indexIn(data)!=-1)
         {
-            model->setState(ST_MAKING_STEP);
+            model->setState(ST_PLACING_SHIPS);
+            model->clearMyField();
+            model->clearEnemyField();
             qDebug() << "We win!";
             emit gameResult( GR_WON );
             return true;
@@ -196,7 +198,9 @@ bool Controller::parseGameResult(const QString& data)
     QRegExp rx2("lose:");
     if (rx2.indexIn(data)!=-1)
         {
-            model->setState(ST_MAKING_STEP);
+            model->setState(ST_PLACING_SHIPS);
+            model->clearMyField();
+            model->clearEnemyField();
             qDebug() << "We lose!";
             emit gameResult( GR_LOST );
             return true;
