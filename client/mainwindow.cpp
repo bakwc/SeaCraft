@@ -5,6 +5,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    qsrand(QTime::currentTime().msec());
+
     ui->setupUi(this);
     pictures = new Images;
     pictures->load();
@@ -194,4 +196,10 @@ void MainWindow::showGameError( GameErrorMessage message )
 
     this->update();
     QMessageBox::information( this, tr("Game Info"), messageString );
+}
+
+void MainWindow::on_actionRandom_triggered()
+{
+    controller->randomField();
+    this->update();
 }

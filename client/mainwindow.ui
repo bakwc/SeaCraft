@@ -73,6 +73,7 @@
      <string>Field</string>
     </property>
     <addaction name="actionClear"/>
+    <addaction name="actionRandom"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuField"/>
@@ -90,6 +91,11 @@
   <action name="actionClear">
    <property name="text">
     <string>Clear</string>
+   </property>
+  </action>
+  <action name="actionRandom">
+   <property name="text">
+    <string>Random</string>
    </property>
   </action>
  </widget>

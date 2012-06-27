@@ -107,6 +107,7 @@ void Controller::parseData(const QString& data)
     parseGo(data);
     parseFields(data);
     parseGameResult(data);
+    parseErrorInfo(data);
 }
 
 bool Controller::parseGo(const QString& data)
@@ -120,6 +121,21 @@ bool Controller::parseGo(const QString& data)
         }
     return false;
 }
+
+bool Controller::parseErrorInfo(const QString& data)
+{
+    QRegExp rx("wronguser:");
+    if (rx.indexIn(data)!=-1)
+        {
+            model->setState(ST_PLACING_SHIPS);
+            connectionError=true;
+            emit gameError(GEM_WRONG_USER);
+            qDebug() << "Wrong user";
+            return true;
+        }
+    return false;
+}
+
 
 bool Controller::parseFields(const QString& data)
 {
@@ -233,6 +249,51 @@ void Controller::clearFields()
     model->clearMyField();
 }
 
+void Controller::randomField()
+{
+    model->clearMyField();
+
+    placeShipAtRandom(4);
+
+    placeShipAtRandom(3);
+    placeShipAtRandom(3);
+
+    placeShipAtRandom(2);
+    placeShipAtRandom(2);
+    placeShipAtRandom(2);
+
+    placeShipAtRandom(1);
+    placeShipAtRandom(1);
+    placeShipAtRandom(1);
+    placeShipAtRandom(1);
+}
+
+void Controller::placeShipAtRandom(int size)
+{
+    int x,y;
+
+    bool isOk=true;
+
+    while (isOk)
+    {
+        x=qrand()%(10-size);
+        y=qrand()%(10-size);
+
+        for (int i=x-1;i<(x+size+1);i++)
+            if (
+                    model->getMyCell(i,y)==CL_SHIP ||
+                    model->getMyCell(i,y-1)==CL_SHIP ||
+                    model->getMyCell(i,y+1)==CL_SHIP
+                    ) isOk=false;
+
+        isOk=!isOk;
+    }
+
+    for (int i=x;i<(x+size);i++)
+        model->setMyCell(i,y,CL_SHIP);
+
+}
+
 void Controller::onError( QAbstractSocket::SocketError socketError )
 {
     Q_UNUSED( socketError );
@@ -243,12 +304,16 @@ void Controller::onConnected()
 {
     QString response;
     QString request;
+    connectionError=false;
+
     request=QString("mbclient:1:%1:%2:")
             .arg(model->getLogin())
             .arg(model->getPassword());
 
     client->write(request.toLocal8Bit());
     if (!client->waitForReadyRead(5000)) return;
+    if (connectionError) return;
+
     response=client->readAll();
     qDebug() << response;
 

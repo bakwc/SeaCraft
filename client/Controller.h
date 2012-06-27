@@ -36,6 +36,7 @@ public:
     void onGameStart();
     void onGameQuit();
     void clearFields();
+    void randomField();
     State getState() const;
     void setConnectionInfo(
         const QString& address,
@@ -62,10 +63,12 @@ private:
     bool parseGo(const QString& data);
     bool parseGameResult(const QString& data);
     bool parseFields(const QString& data);
-
+    void placeShipAtRandom(int size);
+    bool parseErrorInfo(const QString& data);
 private:
     QTcpSocket *client;
     Model *model;
     QHostAddress serverAddress;
     quint16 serverPort;
+    bool connectionError;
 };
