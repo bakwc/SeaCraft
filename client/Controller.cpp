@@ -257,45 +257,58 @@ void Controller::randomField()
 {
     model->clearMyField();
 
-    placeShipAtRandom(4);
-
-    placeShipAtRandom(3);
-    placeShipAtRandom(3);
-
-    placeShipAtRandom(2);
-    placeShipAtRandom(2);
-    placeShipAtRandom(2);
-
-    placeShipAtRandom(1);
-    placeShipAtRandom(1);
-    placeShipAtRandom(1);
-    placeShipAtRandom(1);
+    for( int i = 1, k = 4; i <= 4; i++, k-- )
+        for( int j = 0; j < i; j++ )
+            placeShipAtRandom(k);
 }
 
-void Controller::placeShipAtRandom(int size)
+void Controller::placeShipAtRandom( int size )
 {
-    int x,y;
+    int p;
+    int q;
+    bool r;
+    bool isOk = true;
 
-    bool isOk=true;
-
-    while (isOk)
+    while( isOk )
     {
-        x=qrand()%(10-size);
-        y=qrand()%(10-size);
+        p = qrand() % ( 10 - size + 1 );
+        q = qrand() % ( 10 - size + 1 );
+        r = qrand() % 2;
 
-        for (int i=x-1;i<(x+size+1);i++)
-            if (
-                    model->getMyCell(i,y)==CL_SHIP ||
-                    model->getMyCell(i,y-1)==CL_SHIP ||
-                    model->getMyCell(i,y+1)==CL_SHIP
-                    ) isOk=false;
+        for(
+            int k = r * p + !r * q - 1;
+            k < (r * p + !r * q + size + 1);
+            k++
+        )
+            if(
+                model->getMyCell(
+                    r * k + !r * p,
+                    r * q + !r * k
+                ) == CL_SHIP ||
+                model->getMyCell(
+                    r * k + !r * (p - 1),
+                    r * (q - 1) + !r * k
+                ) == CL_SHIP ||
+                model->getMyCell(
+                    r * k + !r * (p + 1),
+                    r * (q + 1) + !r * k
+                ) == CL_SHIP
+            )
+                isOk = false;
 
-        isOk=!isOk;
+        isOk =! isOk;
     }
 
-    for (int i=x;i<(x+size);i++)
-        model->setMyCell(i,y,CL_SHIP);
-
+    for(
+        int k = r * p + !r * q;
+        k < (r * p + !r * q + size);
+        k++
+    )
+        model->setMyCell(
+            r * k + !r * p,
+            r * q + !r * k,
+            CL_SHIP
+        );
 }
 
 void Controller::onError( QAbstractSocket::SocketError socketError )
