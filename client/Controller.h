@@ -65,6 +65,9 @@ private:
     bool parseFields(const QString& data);
     void placeShipAtRandom(int size);
     bool parseErrorInfo(const QString& data);
+    void readConfig();
+    void saveConfig();
+
 private:
     QTcpSocket *client;
     Model *model;

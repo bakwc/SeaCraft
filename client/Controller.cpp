@@ -21,42 +21,65 @@ Controller::Controller(Model *model_):
         this, SLOT( onError(QAbstractSocket::SocketError) )
     );
 
-
-    // TODO: Move to seporate function
-
-    if( !QFile::exists(DEFAULT_CONFIG_FILE) )
-        {
-            qDebug() << "Config file does not exists!";
-            return;
-        }
-
-    QFile af(DEFAULT_CONFIG_FILE);
-        if( !af.open(QFile::ReadOnly) )
-            return;
-
-    QByteArray line;
-    QRegExp rx("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+):(\\w+):(.+):");
-    while( !af.atEnd() )
-    {
-        line = af.readLine();
-        if(rx.indexIn( line ) == -1) continue;
-        serverAddress=rx.cap(1);
-        serverPort=rx.cap(2).toInt();
-    }
+    readConfig();
 }
 
 Controller::~Controller()
-{           // TODO: move to seporate function
-    QFile file(DEFAULT_CONFIG_FILE);
-    file.open(QIODevice::WriteOnly | QIODevice::Text);
-    QTextStream out(&file);
-    out << QString("%1:%2:%3:%4:\n")
-           .arg(serverAddress.toString())
-           .arg(serverPort)
-           .arg(model->getLogin())
-           .arg(model->getPassword())
-           ;
-    file.close();
+{
+    saveConfig();
+}
+
+void Controller::readConfig()
+{
+    if( !QFile::exists(DEFAULT_CONFIG_FILE) )
+    {
+        qDebug() << "Config file does not exists!";
+        return;
+    }
+
+    QFile cf( DEFAULT_CONFIG_FILE );
+
+    if( !cf.open(QFile::ReadOnly) )
+        return;
+
+    QByteArray line;
+    QRegExp rx( "(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+):(\\w+):(.+):" );
+
+    while( !cf.atEnd() )
+    {
+        line = cf.readLine();
+        if( rx.indexIn(line) == -1 )
+            continue;
+
+        qDebug() << "Setting connection info";
+        setConnectionInfo(
+            rx.cap(1),
+            rx.cap(2).toUInt(),
+            rx.cap(3),
+            rx.cap(4)
+        );
+        break;
+    }
+
+    cf.close();
+}
+
+void Controller::saveConfig()
+{
+    QFile cf( DEFAULT_CONFIG_FILE );
+    if( !cf.open(QIODevice::WriteOnly | QIODevice::Text) )
+        return;
+
+    cf.write(
+        qPrintable(
+            QString( "%1:%2:%3:%4:\n" )
+               .arg( serverAddress.toString() )
+               .arg( serverPort )
+               .arg( model->getLogin() )
+               .arg( model->getPassword() )
+        )
+    );
+    cf.close();
 }
 
 void Controller::onMousePressed(const QPoint& pos, bool setShip)
@@ -135,7 +158,6 @@ bool Controller::parseErrorInfo(const QString& data)
         }
     return false;
 }
-
 
 bool Controller::parseFields(const QString& data)
 {

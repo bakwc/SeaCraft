@@ -129,6 +129,7 @@ void MainWindow::on_actionStart_activated()
         controller->getServerAddress(),
         controller->getServerPort()
     );
+    connectionDialog->setLogin( controller->getUserLogin() );
 
     if( connectionDialog->exec() != QDialog::Accepted )
     {
