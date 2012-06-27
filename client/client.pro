@@ -33,3 +33,6 @@ HEADERS  += mainwindow.h \
     ConnectionInfoDialog.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES += \
+    resources.qrc

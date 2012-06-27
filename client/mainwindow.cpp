@@ -102,7 +102,9 @@ QImage MainWindow::getFieldImage(char fld)
                 painter.drawImage(i*cfx,j*cfy,pictures->get("dot"));
                 break;
                 case CL_HALF:
-                painter.drawImage(i*cfx,j*cfy,pictures->get("half"));
+                painter.drawImage(i*cfx,j*cfy,
+                    fld?pictures->get("half"):pictures->get("redhalf")
+                );
                 break;
                 case CL_SHIP:
                 painter.drawImage(i*cfx,j*cfy,pictures->get("full"));
