@@ -1,6 +1,6 @@
 SeaCraft
 ========
-Sea battle client and server
+Sea battle client and server. Our website is http://seacraft.i-port.su/
 
 #### Server command line arguments
 - --address - specify server addr to spawn (default '0.0.0.0')
