@@ -296,9 +296,9 @@ void Controller::placeShipAtRandom( int size )
 
     while( isOk )
     {
-        p = qrand() % ( 10 - size + 1 );
-        q = qrand() % ( 10 - size + 1 );
         r = qrand() % 2;
+        p = qrand() % ( 10 - r * (size + 1) );
+        q = qrand() % ( 10 - !r * (size + 1) );
 
         for(
             int k = r * p + !r * q - 1;
