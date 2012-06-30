@@ -19,9 +19,11 @@ TEMPLATE = app
 SOURCES += main.cpp \
     MainServer.cpp \
     Field.cpp \
-    Statistics.cpp
+    Statistics.cpp \
+    FieldPro.cpp
 
 HEADERS += \
     MainServer.h \
     Field.h \
-    Statistics.h
+    Statistics.h \
+    FieldPro.h
