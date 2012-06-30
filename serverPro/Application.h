@@ -9,13 +9,13 @@ class Application : public QCoreApplication
 public:
     explicit Application( int& argc, char* argv[] );
     ~Application();
-
-    void parceCmdLine();
-    bool spawnServer();
+    bool init();
 
 private:
-    bool parceOptions( const QString& arg );
-    bool parceOptionsWithParam( const QString& arg, const QString& param );
+    void parseCmdLine();
+    bool parseOptions( const QString& arg );
+    bool parseOptionsWithParam( const QString& arg, const QString& param );
+    bool spawnServer();
 
     bool isOption( const QString& arg, const QString& option );
     bool isOption(
@@ -26,4 +26,5 @@ private:
 
 private:
     Server* server_;
+    bool forceQuit_;
 };
