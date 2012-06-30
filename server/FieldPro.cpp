@@ -15,14 +15,14 @@ FieldPro::FieldPro( int shipSize ):
     for( int i = 1; i <= shipSize; i++ )
         fieldLength_ += i;
 
-    field_.fill( CI_CLEAR, fieldLength_ * fieldLength_ );
+    field_.fill( CI_CLEAR, getFieldSize() );
 }
 
 void FieldPro::initField( const QString& stringField )
 {
     field_.clear();
 
-    int fieldSize = fieldLength_ * fieldLength_;
+    int fieldSize = getFieldSize();
     int sSize = qMin( stringField.length(), fieldSize );
     int nSize = qMax( stringField.length(), fieldSize ) - sSize;
 
@@ -62,7 +62,7 @@ FieldPro::Cell FieldPro::getCell( int x, int y ) const
 {
     int n = y * fieldLength_ + x;
 
-    if( n < 0 || (quint32) n > fieldLength_ * fieldLength_ )
+    if( n < 0 || (quint32) n > getFieldSize() )
         return CI_CLEAR;
 
     return field_[n];
@@ -72,7 +72,7 @@ void FieldPro::setCell( int x, int y, Cell cell )
 {
     int n = y * fieldLength_ + x;
 
-    if( n < 0 || (quint32) n > fieldLength_ * fieldLength_ )
+    if( n < 0 || (quint32) n > getFieldSize() )
         return;
 
     if( cell >= CellSize )
@@ -153,3 +153,17 @@ bool FieldPro::checkField()
     return true;
 }
 
+int FieldPro::getShipSize() const
+{
+    return shipSize_;
+}
+
+int FieldPro::getFieldLength() const
+{
+    return fieldLength_;
+}
+
+int FieldPro::getFieldSize() const
+{
+    return fieldLength_ * fieldLength_;
+}

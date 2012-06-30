@@ -16,26 +16,27 @@ void Client::send( const QString& cmd )
 }
 
 MainServer::MainServer():
-    server( NULL ),
-    timer( NULL ),
-    address( QHostAddress::Any ),
-    port( DEFAULT_PORT ),
-    authFile( DEFAULT_AUTH_FILE ),
-    statFile( DEFAULT_STAT_FILE )
+    server_( NULL ),
+    timer_( NULL ),
+    address_( QHostAddress::Any ),
+    port_( DEFAULT_PORT ),
+    authFile_( DEFAULT_AUTH_FILE ),
+    statFile_( DEFAULT_STAT_FILE ),
+    guestsAllowed_( false )
 {
-    server = new QTcpServer( this );
+    server_ = new QTcpServer( this );
     connect(
-        server,
+        server_,
         SIGNAL(newConnection()),
         this,
         SLOT(onNewUserConnected())
     );
-    stats.load( statFile );
+    stats_.load( statFile_ );
 }
 
 MainServer::~MainServer()
 {
-    stats.save( statFile );
+    stats_.save( statFile_ );
 }
 
 // TODO: rewrite this function
@@ -49,11 +50,11 @@ void MainServer::parceCmdLine( const QStringList& arguments )
         )
         {
             bool ok;
-            this->port = arguments.at( i + 1 ).toInt( &ok );
+            port_ = arguments.at( i + 1 ).toInt( &ok );
 
             if( !ok )
             {
-                this->port = DEFAULT_PORT;
+                port_ = DEFAULT_PORT;
                 continue;
             }
 
@@ -66,7 +67,7 @@ void MainServer::parceCmdLine( const QStringList& arguments )
             i < arguments.count() - 1
         )
         {
-            this->address.setAddress( arguments.at(i + 1) );
+            address_.setAddress( arguments.at(i + 1) );
             i++;
             continue;
         }
@@ -78,12 +79,12 @@ void MainServer::parceCmdLine( const QStringList& arguments )
         {
             if( QFile::exists(arguments.at(i + 1)) )
             {
-                this->authFile = arguments.at( i + 1 );
+                authFile_ = arguments.at( i + 1 );
                 i++;
                 continue;
             }
 
-            this->authFile.clear();
+            authFile_.clear();
             continue;
         }
 
@@ -94,12 +95,18 @@ void MainServer::parceCmdLine( const QStringList& arguments )
         {
             if( QFile::exists(arguments.at(i + 1)) )
             {
-                this->statFile = arguments.at( i + 1 );
+                statFile_ = arguments.at( i + 1 );
                 i++;
                 continue;
             }
 
-            this->statFile.clear();
+            statFile_.clear();
+            continue;
+        }
+
+        if( arguments.at(i).compare("--allowguest") == 0 )
+        {
+            guestsAllowed_ = true;
             continue;
         }
     }
@@ -107,27 +114,27 @@ void MainServer::parceCmdLine( const QStringList& arguments )
 
 bool MainServer::spawn()
 {
-    return spawn( this->address, this->port );
+    return spawn( this->address_, this->port_ );
 }
 
 bool MainServer::spawn( const QHostAddress& address, quint16 port )
 {
-    if( !server )
+    if( !server_ )
         return false;
 
-    if( !server->listen(address, port) )
+    if( !server_->listen(address, port) )
     {
-        qDebug(
-            "Server spawning failed: %s",
-            qPrintable(server->errorString())
+        qCritical(
+            "ERROR: Server spawning failed: %s",
+            qPrintable(server_->errorString())
         );
         return false;
     }
 
-    timer = new QTimer( this );
-    timer->setInterval( DEFAULT_SEARCH_INTERVAL );
-    connect( timer, SIGNAL(timeout()), this, SLOT(onTimer()) );
-    timer->start();
+    timer_ = new QTimer( this );
+    timer_->setInterval( DEFAULT_SEARCH_INTERVAL );
+    connect( timer_, SIGNAL(timeout()), this, SLOT(onTimer()) );
+    timer_->start();
 
     qDebug(
         "Server started at %s:%d",
@@ -140,11 +147,11 @@ bool MainServer::spawn( const QHostAddress& address, quint16 port )
 void MainServer::onNewUserConnected()
 {
     Client client;
-    client.socket = server->nextPendingConnection();
+    client.socket = server_->nextPendingConnection();
     client.status = ST_CONNECTED;
-    client.playingWith = clients.end();
+    client.playingWith = clients_.end();
     int clientId = client.socket->socketDescriptor();
-    clients.insert( clientId, client );
+    clients_.insert( clientId, client );
     connect(
         client.socket,
         SIGNAL(readyRead()),
@@ -163,9 +170,9 @@ void MainServer::receivedData()
 
 void MainServer::parseData( const QString& cmd, int clientId )
 {
-    Clients::iterator i = clients.find( clientId );
+    Clients::iterator i = clients_.find( clientId );
 
-    if( i == clients.end() )
+    if( i == clients_.end() )
         return;
 
     if( authorize(cmd, i) )
@@ -287,23 +294,23 @@ bool MainServer::makeStep( const QString& cmd, Clients::iterator client )
                 client->send( "win:" );
                 client->playingWith->send( "lose:" );
 
-                stats.playerWon( client->login );
-                stats.playerLost( client->playingWith->login );
+                stats_.playerWon( client->login );
+                stats_.playerLost( client->playingWith->login );
 
-                stats.save( statFile );
+                stats_.save( statFile_ );
 
                 client->socket->close();
                 client->playingWith->socket->close();
 
-                Clients::iterator client1 = clients.find(
+                Clients::iterator client1 = clients_.find(
                     client->socket->socketDescriptor()
                 );
-                Clients::iterator client2 = clients.find(
+                Clients::iterator client2 = clients_.find(
                     client->playingWith->socket->socketDescriptor()
                 );
 
-                clients.erase( client1 );
-                clients.erase( client2 );
+                clients_.erase( client1 );
+                clients_.erase( client2 );
             }
 
             client->send( "go:" );
@@ -329,18 +336,18 @@ bool MainServer::placeShips( const QString& ships, Clients::iterator client )
 void MainServer::onTimer()
 {
     // Searching for free clients and connecting them
-    Clients::iterator freeClient = clients.end();
+    Clients::iterator freeClient = clients_.end();
 
-    for( Clients::iterator i = clients.begin(); i != clients.end(); i++ )
+    for( Clients::iterator i = clients_.begin(); i != clients_.end(); i++ )
     {
         if( i->status == ST_READY )
         {
-            if( freeClient == clients.end() )
+            if( freeClient == clients_.end() )
                 freeClient = i;
             else
             {
                 connectTwoClients( freeClient, i );
-                freeClient = clients.end();
+                freeClient = clients_.end();
             }
         }
     }
@@ -366,15 +373,15 @@ bool MainServer::checkUser(
 )
 {
     if( login == "guest" )
-        return true;
+        return guestsAllowed_;
 
-    if( !QFile::exists(authFile) )
+    if( !QFile::exists(authFile_) )
     {
         qDebug() << "Auth file not exists";
         return false;
     }
 
-    QFile af( authFile );
+    QFile af( authFile_ );
 
     if( !af.open(QFile::ReadOnly) )
     {

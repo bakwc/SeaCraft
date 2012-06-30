@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QThread>
 #include "Field.h"
+#include "FieldPro.h"
 #include "Statistics.h"
 
 const quint16 DEFAULT_PORT = 1234;
@@ -45,8 +46,8 @@ public:
     ~MainServer();
     bool spawn();
     bool spawn(
-        const QHostAddress& address,
-        quint16 port
+        const QHostAddress& address_,
+        quint16 port_
     );
     void parceCmdLine( const QStringList& arguments );
 
@@ -68,12 +69,13 @@ private:
     bool checkUser( const QString& login, const QString& password );
 
 private:
-    QTcpServer* server;
-    QTimer* timer;
-    Clients clients;
-    QHostAddress address;
-    Statistics stats;
-    quint16 port;
-    QString authFile;
-    QString statFile;
+    QTcpServer* server_;
+    QTimer* timer_;
+    Clients clients_;
+    QHostAddress address_;
+    Statistics stats_;
+    quint16 port_;
+    QString authFile_;
+    QString statFile_;
+    bool guestsAllowed_;
 };

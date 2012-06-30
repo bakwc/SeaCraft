@@ -29,6 +29,9 @@ public:
     Cell getCell( int x, int y ) const;
     void setCell( int x, int y, Cell cell );
     bool checkField();
+    int getShipSize() const;
+    int getFieldLength() const;
+    int getFieldSize() const;
 
     void showField();
 
