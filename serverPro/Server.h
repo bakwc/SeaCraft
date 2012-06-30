@@ -71,6 +71,7 @@ private:
         const QString& login,
         const QString& password
     );
+    bool registerUserLogin( const QString& login, const QString& password );
 
 private:
     QTcpServer* tcpServer_;

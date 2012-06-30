@@ -53,6 +53,7 @@ bool Application::parseOptions( const QString& arg )
             << "    -p, --port [PORT]      -- and it's port "
             << "(default " << DEFAULT_SERVER_PORT << ")\n"
             << "    -g, --allowguest       -- allow guest accounts\n"
+            << "    -r, --disablereg       -- disallow registration"
         ;
         forceQuit_ = true;
         return true;
@@ -61,6 +62,12 @@ bool Application::parseOptions( const QString& arg )
     if( isOption(arg, "-g", "--allowguest") )
     {
         server_->setGuestAllowed( true );
+        return true;
+    }
+
+    if( isOption(arg, "-r", "--disablereg") )
+    {
+        server_->setRegistrationAllowed( false );
         return true;
     }
 

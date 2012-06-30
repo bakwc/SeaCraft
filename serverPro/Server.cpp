@@ -9,8 +9,11 @@ Server::Server( QObject* parent ):
     QObject( parent ),
     tcpServer_( new QTcpServer(this) ),
     guestAllowed_( false ),
+    registrationAllowed_( true ),
     address_( DEFAULT_SERVER_ADDRESS ),
-    port_( DEFAULT_SERVER_PORT )
+    port_( DEFAULT_SERVER_PORT ),
+    authFile_( DEFAULT_AUTH_FILE ),
+    statFile_( DEFAULT_STAT_FILE )
 {
     connect(
         tcpServer_,
@@ -227,7 +230,10 @@ bool Server::stateAuthorize( const QString& cmd, ClientsIterator client )
     if( rx.indexIn(cmd) == -1 )
         return false;
 
-    if( client->status == Client::ST_AUTHORIZED && client->login == rx.cap(2) )
+    const QString& login = rx.cap(2);
+    const QString& password = rx.cap(4);
+
+    if( client->status == Client::ST_AUTHORIZED && client->login == login )
     {
         client->send( "alreadyauth:" );
         return true;
@@ -240,18 +246,26 @@ bool Server::stateAuthorize( const QString& cmd, ClientsIterator client )
         return true;
     }
 
-    CheckUserStatus cus = checkUserLogin( rx.cap(2), rx.cap(4) );
-    if( cus == CUS_WRONGPASS )
+    CheckUserStatus cus = checkUserLogin( login, password );
+    if( registrationAllowed_ && cus == CUS_NOTFOUND )
+    {
+        cus = CUS_OK;
+        if( !registerUserLogin(login, password) )
+        {
+            // TODO: return 'server error' status or smth
+            return true;
+        }
+    }
+
+    if( cus != CUS_OK )
     {
         client->send( "wronguser:" );
         disconnectClient( client );
         return true;
     }
-    else
-    if( cus == CUS_WRONGPASS )
 
     client->status = Client::ST_AUTHORIZED;
-    client->login = rx.cap(2);
+    client->login = login;
     client->playingWith = clients_.end();
     client->send(
         qPrintable(
@@ -379,5 +393,20 @@ Server::CheckUserStatus Server::checkUserLogin(
         }
     }
 
+    af.close();
     return CUS_NOTFOUND;
+}
+
+bool Server::registerUserLogin( const QString& login, const QString& password )
+{
+    QFile af( authFile_ );
+    if( !af.open(QFile::Append) )
+    {
+        qDebug() << "Unable to open auth file";
+        return false;
+    }
+
+    af.write( qPrintable(QString("%1:%2:\n").arg(login).arg(password)) );
+    af.close();
+    return true;
 }
