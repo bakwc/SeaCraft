@@ -1,11 +1,11 @@
 #include <QDebug>
 #include <QString>
 #include <qiterator.h>
-#include "FieldPro.h"
+#include "Field.h"
 
 const quint16 MAX_SHIP_SIZE = 10;
 
-FieldPro::FieldPro( int shipSize ):
+Field::Field( int shipSize ):
     shipSize_( shipSize ),
     fieldLength_( 0 )
 {
@@ -18,7 +18,7 @@ FieldPro::FieldPro( int shipSize ):
     field_.fill( CI_CLEAR, getFieldSize() );
 }
 
-void FieldPro::initField( const QString& stringField )
+void Field::initField( const QString& stringField )
 {
     field_.clear();
 
@@ -43,7 +43,7 @@ void FieldPro::initField( const QString& stringField )
         field_.push_back( CI_CLEAR );
 }
 
-void FieldPro::showField()
+void Field::showField()
 {
     QString str;
     for( int y = 0; y < fieldLength_; y++ )
@@ -58,7 +58,7 @@ void FieldPro::showField()
     }
 }
 
-FieldPro::Cell FieldPro::getCell( int x, int y ) const
+Field::Cell Field::getCell( int x, int y ) const
 {
     int n = y * fieldLength_ + x;
 
@@ -68,7 +68,7 @@ FieldPro::Cell FieldPro::getCell( int x, int y ) const
     return field_[n];
 }
 
-void FieldPro::setCell( int x, int y, Cell cell )
+void Field::setCell( int x, int y, Cell cell )
 {
     int n = y * fieldLength_ + x;
 
@@ -81,7 +81,7 @@ void FieldPro::setCell( int x, int y, Cell cell )
     field_[n] = cell;
 }
 
-bool FieldPro::checkField()
+bool Field::checkField()
 {
     Cells field( field_ );
 
@@ -153,17 +153,17 @@ bool FieldPro::checkField()
     return true;
 }
 
-int FieldPro::getShipSize() const
+int Field::getShipSize() const
 {
     return shipSize_;
 }
 
-int FieldPro::getFieldLength() const
+int Field::getFieldLength() const
 {
     return fieldLength_;
 }
 
-int FieldPro::getFieldSize() const
+int Field::getFieldSize() const
 {
     return fieldLength_ * fieldLength_;
 }

@@ -1,10 +1,9 @@
 #pragma once
 
 #include <QVector>
+#include "constants.h"
 
-const quint16 DEFAULT_SHIP_SIZE = 4;
-
-class FieldPro
+class Field
 {
 public:
     enum Cell
@@ -24,7 +23,7 @@ public:
     typedef QVector<Cell> Cells;
 
 public:
-    FieldPro( int shipSize = DEFAULT_SHIP_SIZE );
+    Field( int shipSize = DEFAULT_SHIP_SIZE );
     void initField( const QString& stringField );
     Cell getCell( int x, int y ) const;
     void setCell( int x, int y, Cell cell );

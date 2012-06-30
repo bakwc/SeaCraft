@@ -14,12 +14,14 @@ CONFIG   -= app_bundle
 TEMPLATE  = app
 
 SOURCES += main.cpp \
-    FieldPro.cpp \
     Server.cpp \
-    Application.cpp
+    Application.cpp \
+    Client.cpp \
+    Field.cpp
 
 HEADERS += \
-    FieldPro.h \
     Server.h \
     Application.h \
-    constants.h
+    constants.h \
+    Client.h \
+    Field.h
