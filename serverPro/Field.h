@@ -27,12 +27,16 @@ public:
     void initField( const QString& stringField );
     Cell getCell( int x, int y ) const;
     void setCell( int x, int y, Cell cell );
-    bool checkField();
+    bool checkField() const;
     int getShipSize() const;
     int getFieldLength() const;
     int getFieldSize() const;
 
     void showField();
+
+private:
+    Cell getCellPrivate( int x, int y, const Cells& cells ) const;
+    void setCellPrivate( int x, int y, Cell cell, Cells& cells ) const;
 
 private:
     int shipSize_;

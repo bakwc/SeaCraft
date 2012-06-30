@@ -60,15 +60,34 @@ void Field::showField()
 
 Field::Cell Field::getCell( int x, int y ) const
 {
+    return getCellPrivate( x, y, field_ );
+}
+
+void Field::setCell( int x, int y, Cell cell )
+{
+    setCellPrivate( x, y, cell, field_ );
+}
+
+Field::Cell Field::getCellPrivate(
+    int x,
+    int y,
+    const Field::Cells& cells
+) const
+{
     int n = y * fieldLength_ + x;
 
     if( n < 0 || (quint32) n > getFieldSize() )
         return CI_CLEAR;
 
-    return field_[n];
+    return cells[n];
 }
 
-void Field::setCell( int x, int y, Cell cell )
+void Field::setCellPrivate(
+    int x,
+    int y,
+    Cell cell,
+    Field::Cells& cells
+) const
 {
     int n = y * fieldLength_ + x;
 
@@ -78,10 +97,10 @@ void Field::setCell( int x, int y, Cell cell )
     if( cell >= CellSize )
         cell = CI_CLEAR;
 
-    field_[n] = cell;
+    cells[n] = cell;
 }
 
-bool Field::checkField()
+bool Field::checkField() const
 {
     Cells field( field_ );
 
@@ -95,12 +114,12 @@ bool Field::checkField()
     for( int y = 0; y < fieldLength_; y++ )
         for( int x = 0; x < fieldLength_; x++ )
         {
-            cell = getCell( x, y );
+            cell = getCellPrivate( x, y, field );
 
             if( cell == CI_CENTER )
             {
                 shipsCount[0]++;
-                setCell( x, y, CI_CLEAR );
+                setCellPrivate( x, y, CI_CLEAR, field );
                 continue;
             }
 
@@ -112,8 +131,17 @@ bool Field::checkField()
 
                 do
                 {
-                    cell = getCell( x + b*(1 + k), y + !b*(1 + k) );
-                    setCell( x + b*(1 + k), y + !b*(1 + k), CI_CLEAR );
+                    cell = getCellPrivate(
+                        x + b*(1 + k),
+                        y + !b*(1 + k),
+                        field
+                    );
+                    setCellPrivate(
+                         x + b*(1 + k),
+                         y + !b*(1 + k),
+                         CI_CLEAR,
+                         field
+                    );
 
                     if(
                         (cell == CI_VMIDDLE && !b) ||
@@ -140,7 +168,7 @@ bool Field::checkField()
                     return false;
 
                 shipsCount[n - 1]++;
-                setCell( x, y, CI_CLEAR );
+                setCellPrivate( x, y, CI_CLEAR, field );
                 continue;
             }
         }
