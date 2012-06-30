@@ -10,7 +10,6 @@
 #include <QTimer>
 #include <QThread>
 #include "Field.h"
-#include "FieldPro.h"
 #include "Statistics.h"
 
 const quint16 DEFAULT_PORT = 1234;
