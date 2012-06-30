@@ -69,6 +69,16 @@ bool Server::isGuestAllowed() const
     return guestAllowed_;
 }
 
+void Server::setRegistrationAllowed( bool state )
+{
+    registrationAllowed_ = state;
+}
+
+bool Server::isRegistrationAllowed() const
+{
+    return registrationAllowed_;
+}
+
 void Server::setAddress( const QString& address )
 {
     address_ = QHostAddress( address );
@@ -147,11 +157,17 @@ void Server::connectTwoClients(
     client2->status = Client::ST_WAITING_STEP;
     client1->playingWith = client2;
     client2->playingWith = client1;
-    /*
-    client1->socket->write( "found:\n" );
-    client2->socket->write( "found:\n" );
-    client1->socket->write( "go:\n" );
-    */
+    client1->socket->write(
+        qPrintable(
+            QString("found:%s:").arg(client2->login)
+        )
+    );
+    client2->socket->write(
+        qPrintable(
+            QString("found:%s:").arg(client1->login)
+        )
+    );
+    client1->socket->write( "go:" );
 }
 
 void Server::on_newUserConnected()
@@ -184,10 +200,7 @@ void Server::parseData( const QString& cmd, int clientId )
     ClientsIterator cit = clients_.find( clientId );
 
     if( cit == clients_.end() )
-    {
-        qDebug() << "No users";
         return;
-    }
 
     if( stateAuthorize(cmd, cit) )
         return;
@@ -206,7 +219,11 @@ void Server::parseData( const QString& cmd, int clientId )
 
 bool Server::stateAuthorize( const QString& cmd, ClientsIterator client )
 {
-    QRegExp rx( "mbclient:(\\d+):((\\w|\\d){3,16}):(.+):" );
+    QRegExp rx(
+        QString("mbclient:(\\d+):((\\w|\\d){%1,%2}):(.+):")
+            .arg(LOGIN_LENGTH_MIN)
+            .arg(LOGIN_LENGTH_MAX)
+    );
     if( rx.indexIn(cmd) == -1 )
         return false;
 
@@ -223,12 +240,15 @@ bool Server::stateAuthorize( const QString& cmd, ClientsIterator client )
         return true;
     }
 
-    if( !checkUserLogin(rx.cap(2), rx.cap(4)) )
+    CheckUserStatus cus = checkUserLogin( rx.cap(2), rx.cap(4) );
+    if( cus == CUS_WRONGPASS )
     {
         client->send( "wronguser:" );
         disconnectClient( client );
         return true;
     }
+    else
+    if( cus == CUS_WRONGPASS )
 
     client->status = Client::ST_AUTHORIZED;
     client->login = rx.cap(2);
@@ -245,12 +265,44 @@ bool Server::stateAuthorize( const QString& cmd, ClientsIterator client )
 
 bool Server::stateRecieveField( const QString& cmd, ClientsIterator client )
 {
+    QRegExp rx( "field:(\\d{1,2}):([0-8]+):" );
+    if( rx.indexIn(cmd) == -1 )
+        return false;
 
+    if( client->status != Client::ST_AUTHORIZED )
+        return false;
+
+    int shipSize = rx.cap(1).toInt();
+    const QString& field = rx.cap(2);
+
+    client->setField( field, shipSize );
+    if( !client->field()->checkField() )
+    {
+        client->send( "wrongfield:" );
+        qDebug() << "User" << client->login << "passed wrong field";
+        client->field()->showField();
+        return true;
+    }
+
+    client->status = Client::ST_READY;
     return true;
 }
 
 bool Server::stateRecieveSteps( const QString& cmd, ClientsIterator client )
 {
+    QRegExp rx( "step:(\\d):(\\d):" );
+    if( rx.indexIn(cmd) == -1 )
+        return false;
+
+    if( client->status != Client::ST_MAKING_STEP )
+        return false;
+
+    int x = rx.cap( 1 ).toInt();
+    int y = rx.cap( 2 ).toInt();
+    QString response1;
+    QString response2;
+
+    Field::Cell current = client->playingWith->field()->getCell( x, y );
 
     return true;
 }
@@ -280,15 +332,18 @@ bool Server::checkProtocolVersion( int version )
     return version == PROTOCOL_VERSION;
 }
 
-bool Server::checkUserLogin( const QString& login, const QString& password )
+Server::CheckUserStatus Server::checkUserLogin(
+    const QString& login,
+    const QString& password
+)
 {
     if( login == "guest" )
-        return true;
+        return CUS_OK;
 
     if( !QFile::exists(authFile_) )
     {
         qWarning() << "WARNING: Auth file not exists";
-        return false;
+        return CUS_NOTFOUND;
     }
 
     QFile af( authFile_ );
@@ -296,10 +351,33 @@ bool Server::checkUserLogin( const QString& login, const QString& password )
     if( !af.open(QFile::ReadOnly) )
     {
         qCritical() << "ERROR: Unable to open auth file";
-        return false;
+        return CUS_NOTFOUND;
     }
 
-    af.close();
+    QByteArray data;
+    QRegExp rx(
+        QString("((\\d|\\w| ){%1,%2}):((\\d|\\w){%3,%4}):")
+            .arg(LOGIN_LENGTH_MIN).arg(LOGIN_LENGTH_MAX)
+            .arg(PASSWORD_LENGTH_MIN).arg(PASSWORD_LENGTH_MAX)
+    );
 
-    return true;
+    while( !af.atEnd() )
+    {
+        data = af.readLine();
+
+        if( rx.indexIn(data) == -1 )
+            continue;
+
+        if( login.compare(rx.cap(1)) == 0 )
+        {
+            af.close();
+
+            if( password.compare(rx.cap(3)) == 0 )
+                return CUS_OK;
+
+            return CUS_WRONGPASS;
+        }
+    }
+
+    return CUS_NOTFOUND;
 }

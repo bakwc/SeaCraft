@@ -17,13 +17,21 @@ public:
         ST_MAKING_STEP
     };
 
+    explicit Client();
+    ~Client();
+
     void send( const QString& cmd );
 
     QTcpSocket* socket;
     ClientStatus status;
     ClientIterator playingWith;
-    Field field;
     QString login;
+
+    void setField( const QString& field, int shipSize );
+    const Field* field() const;
+
+private:
+    Field* field_;
 };
 
 typedef QMap<int, Client> Clients;

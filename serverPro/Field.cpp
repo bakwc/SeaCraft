@@ -43,7 +43,7 @@ void Field::initField( const QString& stringField )
         field_.push_back( CI_CLEAR );
 }
 
-void Field::showField()
+void Field::showField() const
 {
     QString str;
     for( int y = 0; y < fieldLength_; y++ )
@@ -102,6 +102,9 @@ void Field::setCellPrivate(
 
 bool Field::checkField() const
 {
+    if( field_.size() < getFieldSize() || field_.size() == 0 )
+        return false;
+
     Cells field( field_ );
 
     QVector<int> shipsCount;

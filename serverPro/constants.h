@@ -8,3 +8,7 @@ const QHostAddress DEFAULT_SERVER_ADDRESS = QHostAddress::Any;
 const QString DEFAULT_STAT_FILE = "stats";
 const QString DEFAULT_AUTH_FILE = "authorized";
 const quint16 DEFAULT_SHIP_SIZE = 4;
+const quint16 LOGIN_LENGTH_MIN = 2;
+const quint16 LOGIN_LENGTH_MAX = 16;
+const quint16 PASSWORD_LENGTH_MIN = 4;
+const quint16 PASSWORD_LENGTH_MAX = 32;

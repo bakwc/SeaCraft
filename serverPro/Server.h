@@ -17,6 +17,13 @@ public:
         PV_RELEASE
     };
 
+    enum CheckUserStatus
+    {
+        CUS_NOTFOUND = -1,
+        CUS_OK = 0,
+        CUS_WRONGPASS = 1
+    };
+
     explicit Server( QObject* parent = 0 );
     ~Server();
 
@@ -29,6 +36,8 @@ public:
 
     void setGuestAllowed( bool state );
     bool isGuestAllowed() const;
+    void setRegistrationAllowed( bool state );
+    bool isRegistrationAllowed() const;
     void setAddress( const QString& address );
     QString address() const;
     void address( QHostAddress& addr ) const;
@@ -58,11 +67,15 @@ private:
     bool stateRecieveSteps( const QString& cmd, ClientsIterator client );
     bool stateRecieveStatus( const QString& cmd, ClientsIterator client );
     bool checkProtocolVersion( int version );
-    bool checkUserLogin( const QString& login, const QString& password );
+    CheckUserStatus checkUserLogin(
+        const QString& login,
+        const QString& password
+    );
 
 private:
     QTcpServer* tcpServer_;
     bool guestAllowed_;
+    bool registrationAllowed_;
     QHostAddress address_;
     quint16 port_;
     QString authFile_;

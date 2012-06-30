@@ -32,7 +32,7 @@ public:
     int getFieldLength() const;
     int getFieldSize() const;
 
-    void showField();
+    void showField() const;
 
 private:
     Cell getCellPrivate( int x, int y, const Cells& cells ) const;
