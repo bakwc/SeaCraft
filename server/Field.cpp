@@ -8,6 +8,7 @@ void Field::initField( const QString& initData )
         i++
     )
         field.push_back( Cell(QString(*i).toInt()) );
+
     killedShips = 0;
 }
 
@@ -37,56 +38,79 @@ bool Field::isFieldCorrect( const QString& fieldstr )
     // TODO: 100 - width*height
     if( fieldstr.size() != 100 )
         return false;
+
     return true;
 }
 
 bool Field::checkField()
 {
-    return (shipNum(1)==4 &&
-            shipNum(2)==3 &&
-            shipNum(3)==2 &&
-            shipNum(4)==1);
+    return (
+        shipNum(1) == 4 &&
+        shipNum(2) == 3 &&
+        shipNum(3) == 2 &&
+        shipNum(4) == 1
+    );
 }
 
-int Field::shipNum(int size) const
+int Field::shipNum( int size ) const
 {
-    int shipNumber=0;
-    for (int i=0;i<10;i++)
-        for (int j=0;j<10;j++)
-            if (isShip(size,i,j))
+    int shipNumber = 0;
+
+    for( int i = 0; i < 10; i++ )
+        for( int j = 0; j < 10; j++ )
+            if( isShip(size, i, j) )
                 shipNumber++;
+
     return shipNumber;
 }
 
-bool Field::isShip(int size, int x, int y) const
+bool Field::isShip( int size, int x, int y ) const
 {
-    if (x>0 && getCell(x-1,y)!=CL_CLEAR) return false; // left field !clear
-    if (y>0 && getCell(x,y-1)!=CL_CLEAR) return false; // up field !clear
-    if (getCell(x,y)==CL_CLEAR) return false;  // no ship here
-    int tmp=x,num=0;
+    // left field !clear
+    if( x > 0 && getCell(x - 1, y) != CL_CLEAR )
+        return false;
 
-    while (getCell(tmp,y)!=CL_CLEAR && tmp<10)    // checking in right direction
+    // up field !clear
+    if( y > 0 && getCell(x, y - 1) != CL_CLEAR )
+        return false;
+
+    // no ship here
+    if( getCell(x, y) == CL_CLEAR )
+        return false;
+
+    int tmp = x;
+    int num = 0;
+
+    // checking in right direction
+    while( getCell(tmp, y) != CL_CLEAR && tmp < 10 )
     {
         tmp++;
         num++;
     }
-    if (num==size)
+
+    if( num == size )
     {
-        if (getCell(x,y+1)!=CL_CLEAR)
+        if( getCell(x, y + 1) != CL_CLEAR )
             return false;
+
         return true;
     }
 
-    tmp=y,num=0;
-    while (getCell(x,tmp)!=CL_CLEAR && tmp<10)    // checking in down direction
+    tmp = y;
+    num = 0;
+
+    // checking in down direction
+    while( getCell(x, tmp) != CL_CLEAR && tmp < 10 )
     {
         tmp++;
         num++;
     }
-    if (num==size)
+
+    if( num == size )
     {
-        if (getCell(x+1,y)!=CL_CLEAR)
+        if( getCell(x + 1, y) != CL_CLEAR )
             return false;
+
         return true;
     }
 

@@ -2,23 +2,25 @@
 
 const QString& DEFAULT_CONFIG_FILE = "config.ini";
 
-Controller::Controller(Model *model_):
-    model(model_),
+Controller::Controller( Model* model_ ):
+    model( model_ ),
     serverAddress( QHostAddress::LocalHost ),
     serverPort( 1234 )
 {
-    client = new QTcpSocket(this);
-    connect(client,SIGNAL(readyRead()),
-            this,SLOT(onDataReceived()));
-
+    client = new QTcpSocket( this );
     connect(
-        client, SIGNAL( connected() ),
-        this, SLOT( onConnected() )
+        client, SIGNAL(readyRead()),
+        this, SLOT(onDataReceived())
     );
 
     connect(
-        client, SIGNAL( error(QAbstractSocket::SocketError) ),
-        this, SLOT( onError(QAbstractSocket::SocketError) )
+        client, SIGNAL(connected()),
+        this, SLOT(onConnected())
+    );
+
+    connect(
+        client, SIGNAL(error(QAbstractSocket::SocketError)),
+        this, SLOT(onError(QAbstractSocket::SocketError))
     );
 
     readConfig();
@@ -48,6 +50,7 @@ void Controller::readConfig()
     while( !cf.atEnd() )
     {
         line = cf.readLine();
+
         if( rx.indexIn(line) == -1 )
             continue;
 
@@ -67,22 +70,23 @@ void Controller::readConfig()
 void Controller::saveConfig()
 {
     QFile cf( DEFAULT_CONFIG_FILE );
+
     if( !cf.open(QIODevice::WriteOnly | QIODevice::Text) )
         return;
 
     cf.write(
         qPrintable(
-            QString( "%1:%2:%3:%4:\n" )
-               .arg( serverAddress.toString() )
-               .arg( serverPort )
-               .arg( model->getLogin() )
-               .arg( model->getPassword() )
+            QString("%1:%2:%3:%4:\n")
+            .arg(serverAddress.toString())
+            .arg(serverPort)
+            .arg(model->getLogin())
+            .arg(model->getPassword())
         )
     );
     cf.close();
 }
 
-void Controller::onMousePressed(const QPoint& pos, bool setShip)
+void Controller::onMousePressed( const QPoint& pos, bool setShip )
 {
     if( model->getState() == ST_PLACING_SHIPS )
     {
@@ -100,6 +104,7 @@ void Controller::onMousePressed(const QPoint& pos, bool setShip)
     if( model->getState() == ST_MAKING_STEP )
     {
         QPoint point = getEnemyFieldCoord( pos );
+
         if( point.x() == -1 )
             return;
 
@@ -108,7 +113,7 @@ void Controller::onMousePressed(const QPoint& pos, bool setShip)
 
         QString cmd;
         cmd = QString( "step:%1:%2:" ).arg( point.x() ).arg( point.y() );
-        qDebug () << cmd;
+        qDebug() << cmd;
         client->write( cmd.toLocal8Bit() );
         model->setState( ST_WAITING_STEP );
         emit stateChanged();
@@ -125,108 +130,134 @@ void Controller::onDataReceived()
     emit stateChanged();
 }
 
-void Controller::parseData(const QString& data)
+void Controller::parseData( const QString& data )
 {
-    parseGo(data);
-    parseFields(data);
-    parseGameResult(data);
-    parseErrorInfo(data);
+    parseGo( data );
+    parseFields( data );
+    parseGameResult( data );
+    parseErrorInfo( data );
 }
 
-bool Controller::parseGo(const QString& data)
+bool Controller::parseGo( const QString& data )
 {
-    QRegExp rx("go:");
-    if (rx.indexIn(data)!=-1)
-        {
-            model->setState(ST_MAKING_STEP);
-            qDebug() << "Now making step!";
-            return true;
-        }
+    QRegExp rx( "go:" );
+
+    if( rx.indexIn(data) != -1 )
+    {
+        model->setState( ST_MAKING_STEP );
+        qDebug() << "Now making step!";
+        return true;
+    }
+
     return false;
 }
 
-bool Controller::parseErrorInfo(const QString& data)
+bool Controller::parseErrorInfo( const QString& data )
 {
-    QRegExp rx("wronguser:");
-    if (rx.indexIn(data)!=-1)
-        {
-            model->setState(ST_PLACING_SHIPS);
-            connectionError=true;
-            emit gameError(GEM_WRONG_USER);
-            qDebug() << "Wrong user";
-            return true;
-        }
+    QRegExp rx( "wronguser:" );
+
+    if( rx.indexIn(data) != -1 )
+    {
+        model->setState( ST_PLACING_SHIPS );
+        connectionError = true;
+        emit gameError( GEM_WRONG_USER );
+        qDebug() << "Wrong user";
+        return true;
+    }
+
     return false;
 }
 
-bool Controller::parseFields(const QString& data)
+bool Controller::parseFields( const QString& data )
 {
-    QRegExp rx("field(\\d):(\\w+):(\\d):(\\d):");
-    if (rx.indexIn(data)!=-1)
-        {
-            qDebug() << "Field:" << rx.cap(1);
-            qDebug() << "Status:" << rx.cap(2);
-            qDebug() << "X:" << rx.cap(3);
-            qDebug() << "Y:" << rx.cap(4);
-            if (rx.cap(1)=="2")
-            {
-                if (rx.cap(2)=="half")
-                    model->setEnemyCell(rx.cap(3).toInt(),
-                                        rx.cap(4).toInt(),
-                                        CL_HALF);
-                if (rx.cap(2)=="kill")
-                    model->setEnemyCell(rx.cap(3).toInt(),
-                                        rx.cap(4).toInt(),
-                                        CL_SHIP);
-                if (rx.cap(2)=="miss")
-                    model->setEnemyCell(rx.cap(3).toInt(),
-                                        rx.cap(4).toInt(),
-                                        CL_DOT);
-            }
+    QRegExp rx( "field(\\d):(\\w+):(\\d):(\\d):" );
 
-            if (rx.cap(1)=="1")
-            {
-                if (rx.cap(2)=="half")
-                    model->setMyCell(rx.cap(3).toInt(),
-                                        rx.cap(4).toInt(),
-                                        CL_HALF);
-                if (rx.cap(2)=="kill")
-                    model->setMyCell(rx.cap(3).toInt(),
-                                        rx.cap(4).toInt(),
-                                        CL_SHIP);
-                if (rx.cap(2)=="miss")
-                    model->setMyCell(rx.cap(3).toInt(),
-                                        rx.cap(4).toInt(),
-                                        CL_DOT);
-            }
-            return true;
+    if( rx.indexIn(data) != -1 )
+    {
+        qDebug() << "Field:" << rx.cap( 1 );
+        qDebug() << "Status:" << rx.cap( 2 );
+        qDebug() << "X:" << rx.cap( 3 );
+        qDebug() << "Y:" << rx.cap( 4 );
+
+        if( rx.cap(1) == "2" )
+        {
+            if( rx.cap(2) == "half" )
+                model->setEnemyCell(
+                    rx.cap(3).toInt(),
+                    rx.cap(4).toInt(),
+                    CL_HALF
+                );
+
+            if( rx.cap(2) == "kill" )
+                model->setEnemyCell(
+                    rx.cap(3).toInt(),
+                    rx.cap(4).toInt(),
+                    CL_SHIP
+                );
+
+            if( rx.cap(2) == "miss" )
+                model->setEnemyCell(
+                    rx.cap(3).toInt(),
+                    rx.cap(4).toInt(),
+                    CL_DOT
+                );
         }
+
+        if( rx.cap(1) == "1" )
+        {
+            if( rx.cap(2) == "half" )
+                model->setMyCell(
+                    rx.cap(3).toInt(),
+                    rx.cap(4).toInt(),
+                    CL_HALF
+                );
+
+            if( rx.cap(2) == "kill" )
+                model->setMyCell(
+                    rx.cap(3).toInt(),
+                    rx.cap(4).toInt(),
+                    CL_SHIP
+                );
+
+            if( rx.cap(2) == "miss" )
+                model->setMyCell(
+                    rx.cap(3).toInt(),
+                    rx.cap(4).toInt(),
+                    CL_DOT
+                );
+        }
+
+        return true;
+    }
+
     return false;
 }
 
-bool Controller::parseGameResult(const QString& data)
+bool Controller::parseGameResult( const QString& data )
 {
-    QRegExp rx("win:");
-    if (rx.indexIn(data)!=-1)
-        {
-            qDebug() << "We win!";
-            emit gameResult( GR_WON );
-            model->setState(ST_PLACING_SHIPS);
-            model->clearMyField();
-            model->clearEnemyField();
-            return true;
-        }
+    QRegExp rx( "win:" );
 
-    QRegExp rx2("lose:");
-    if (rx2.indexIn(data)!=-1)
-        {
-            qDebug() << "We lose!";
-            emit gameResult( GR_LOST );
-            model->setState(ST_PLACING_SHIPS);
-            model->clearMyField();
-            model->clearEnemyField();
-            return true;
-        }
+    if( rx.indexIn(data) != -1 )
+    {
+        qDebug() << "We win!";
+        emit gameResult( GR_WON );
+        model->setState( ST_PLACING_SHIPS );
+        model->clearMyField();
+        model->clearEnemyField();
+        return true;
+    }
+
+    QRegExp rx2( "lose:" );
+
+    if( rx2.indexIn(data) != -1 )
+    {
+        qDebug() << "We lose!";
+        emit gameResult( GR_LOST );
+        model->setState( ST_PLACING_SHIPS );
+        model->clearMyField();
+        model->clearEnemyField();
+        return true;
+    }
 
     return false;
 }
@@ -247,9 +278,9 @@ void Controller::onGameStart()
 
     qDebug(
         "Connected to host %s:%d as %s",
-        qPrintable( serverAddress.toString() ),
+        qPrintable(serverAddress.toString()),
         serverPort,
-        qPrintable( model->getLogin() )
+        qPrintable(model->getLogin())
     );
 
     client->connectToHost( serverAddress, serverPort );
@@ -262,7 +293,7 @@ void Controller::onGameQuit()
         qDebug() << "Disconnecting from host";
         // TODO: send to server information about quiting from game
         client->disconnectFromHost();
-        model->setState(ST_PLACING_SHIPS);
+        model->setState( ST_PLACING_SHIPS );
     }
 }
 
@@ -284,7 +315,7 @@ void Controller::randomField()
 
     for( int i = 1, k = 4; i <= 4; i++, k-- )
         for( int j = 0; j < i; j++ )
-            placeShipAtRandom(k);
+            placeShipAtRandom( k );
 }
 
 void Controller::placeShipAtRandom( int size )
@@ -321,7 +352,7 @@ void Controller::placeShipAtRandom( int size )
             )
                 isOk = false;
 
-        isOk =! isOk;
+        isOk = ! isOk;
     }
 
     for(
@@ -346,24 +377,26 @@ void Controller::onConnected()
 {
     QString response;
     QString request;
-    connectionError=false;
+    connectionError = false;
 
-    request=QString("mbclient:1:%1:%2:")
-            .arg(model->getLogin())
-            .arg(model->getPassword());
+    request = QString( "mbclient:1:%1:%2:" )
+        .arg( model->getLogin() )
+        .arg( model->getPassword() );
 
-    client->write(request.toLocal8Bit());
-    if (!client->waitForReadyRead(5000)) return;
-    if (connectionError) return;
+    client->write( request.toLocal8Bit() );
 
-    response=client->readAll();
+    if( !client->waitForReadyRead(5000) ) return;
+
+    if( connectionError ) return;
+
+    response = client->readAll();
     qDebug() << response;
 
-    request="field:"+model->getMyField()+":";
-    client->write(request.toLocal8Bit());
+    request = "field:" + model->getMyField() + ":";
+    client->write( request.toLocal8Bit() );
 
     qDebug() << request;
-    model->setState(ST_WAITING_STEP);
+    model->setState( ST_WAITING_STEP );
 }
 
 State Controller::getState() const

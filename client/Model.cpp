@@ -4,7 +4,7 @@ Model::Model()
 {
     myField = new Field;
     enemyField = new Field;
-    state=ST_PLACING_SHIPS;
+    state = ST_PLACING_SHIPS;
 }
 
 Model::~Model()
@@ -13,14 +13,14 @@ Model::~Model()
     delete enemyField;
 }
 
-Cell Model::getMyCell(int x, int y) const
+Cell Model::getMyCell( int x, int y ) const
 {
-    return myField->getCell(x,y);
+    return myField->getCell( x, y );
 }
 
-void Model::setMyCell(int x, int y, Cell cell)
+void Model::setMyCell( int x, int y, Cell cell )
 {
-    myField->setCell(x,y,cell);
+    myField->setCell( x, y, cell );
 }
 
 QString Model::getMyField() const
@@ -28,14 +28,14 @@ QString Model::getMyField() const
     return myField->getField();
 }
 
-Cell Model::getEnemyCell(int x, int y) const
+Cell Model::getEnemyCell( int x, int y ) const
 {
-    return enemyField->getCell(x,y);
+    return enemyField->getCell( x, y );
 }
 
-void Model::setEnemyCell(int x, int y, Cell cell)
+void Model::setEnemyCell( int x, int y, Cell cell )
 {
-    enemyField->setCell(x,y,cell);
+    enemyField->setCell( x, y, cell );
 }
 
 QString Model::getEnemyField() const
@@ -48,19 +48,19 @@ State Model::getState() const
     return state;
 }
 
-void Model::setState(State st)
+void Model::setState( State st )
 {
-    state=st;
+    state = st;
 }
 
-void Model::setLogin(const QString& str)
+void Model::setLogin( const QString& str )
 {
-    login=str;
+    login = str;
 }
 
-void Model::setPassword(const QString& str)
+void Model::setPassword( const QString& str )
 {
-    pass=str;
+    pass = str;
 }
 
 QString Model::getLogin() const
@@ -74,52 +74,75 @@ QString Model::getPassword() const
 }
 
 bool Model::checkMyField() const
-{   // Check field for correct ship placement
-    return (shipNum(1)==4 &&
-            shipNum(2)==3 &&
-            shipNum(3)==2 &&
-            shipNum(4)==1);
+{
+    // Check field for correct ship placement
+    return (
+        shipNum(1) == 4 &&
+        shipNum(2) == 3 &&
+        shipNum(3) == 2 &&
+        shipNum(4) == 1
+    );
 }
 
-int Model::shipNum(int size) const
+int Model::shipNum( int size ) const
 {
-    int shipNumber=0;
-    for (int i=0;i<10;i++)
-        for (int j=0;j<10;j++)
-            if (isShip(size,i,j))
+    int shipNumber = 0;
+
+    for( int i = 0; i < 10; i++ )
+        for( int j = 0; j < 10; j++ )
+            if( isShip(size, i, j) )
                 shipNumber++;
+
     return shipNumber;
 }
 
-bool Model::isShip(int size, int x, int y) const
+bool Model::isShip( int size, int x, int y ) const
 {
-    if (x>0 && myField->getCell(x-1,y)!=CL_CLEAR) return false; // left field !clear
-    if (y>0 && myField->getCell(x,y-1)!=CL_CLEAR) return false; // up field !clear
-    if (myField->getCell(x,y)==CL_CLEAR) return false;  // no ship here
-    int tmp=x,num=0;
+    // left field !clear
+    if( x > 0 && myField->getCell(x - 1, y) != CL_CLEAR )
+        return false;
 
-    while (myField->getCell(tmp,y)!=CL_CLEAR && tmp<10)    // checking in right direction
+    // up field !clear
+    if( y > 0 && myField->getCell(x, y - 1) != CL_CLEAR )
+        return false;
+
+    // no ship here
+    if( myField->getCell(x, y) == CL_CLEAR )
+        return false;
+
+    int tmp = x;
+    int num = 0;
+
+    // checking in right direction
+    while( myField->getCell(tmp, y) != CL_CLEAR && tmp < 10 )
     {
         tmp++;
         num++;
     }
-    if (num==size)
+
+    if( num == size )
     {
-        if (myField->getCell(x,y+1)!=CL_CLEAR)
+        if( myField->getCell(x, y + 1) != CL_CLEAR )
             return false;
+
         return true;
     }
 
-    tmp=y,num=0;
-    while (myField->getCell(x,tmp)!=CL_CLEAR && tmp<10)    // checking in down direction
+    tmp = y;
+    num = 0;
+
+    // checking in down direction
+    while( myField->getCell(x, tmp) != CL_CLEAR && tmp < 10 )
     {
         tmp++;
         num++;
     }
-    if (num==size)
+
+    if( num == size )
     {
-        if (myField->getCell(x+1,y)!=CL_CLEAR)
+        if( myField->getCell(x + 1, y) != CL_CLEAR )
             return false;
+
         return true;
     }
 

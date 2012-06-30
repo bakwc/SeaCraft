@@ -16,7 +16,8 @@
 #include "Defines.h"
 
 
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 
@@ -25,12 +26,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow( QWidget* parent = 0 );
     ~MainWindow();
 
 protected:
     void paintEvent( QPaintEvent* event );
-    void mousePressEvent ( QMouseEvent* ev );
+    void mousePressEvent( QMouseEvent* ev );
 
 private slots:
     void redraw();
@@ -42,19 +43,19 @@ private slots:
     void on_actionRandom_triggered();
 
 private:
-    void setStatus(const QString& status);
+    void setStatus( const QString& status );
 
 private:
     QImage myFieldImage();
     QImage enemyFieldImage();
-    QImage getFieldImage(char);
+    QImage getFieldImage( char );
 
 private:
-    Ui::MainWindow *ui;
-    Images *pictures;
+    Ui::MainWindow* ui;
+    Images* pictures;
     State state;
-    Model *model;
-    Controller *controller;
+    Model* model;
+    Controller* controller;
 };
 
 #endif // MAINWINDOW_H

@@ -30,9 +30,9 @@ class Controller: public QWidget
 {
     Q_OBJECT
 public:
-    Controller(Model *model_);
+    Controller( Model* model_ );
     ~Controller();
-    void onMousePressed(const QPoint& position, bool setShip = true);
+    void onMousePressed( const QPoint& position, bool setShip = true );
     void onGameStart();
     void onGameQuit();
     void clearFields();
@@ -59,18 +59,18 @@ private slots:
     void onError( QAbstractSocket::SocketError socketError );
 
 private:
-    void parseData(const QString& data);
-    bool parseGo(const QString& data);
-    bool parseGameResult(const QString& data);
-    bool parseFields(const QString& data);
-    void placeShipAtRandom(int size);
-    bool parseErrorInfo(const QString& data);
+    void parseData( const QString& data );
+    bool parseGo( const QString& data );
+    bool parseGameResult( const QString& data );
+    bool parseFields( const QString& data );
+    void placeShipAtRandom( int size );
+    bool parseErrorInfo( const QString& data );
     void readConfig();
     void saveConfig();
 
 private:
-    QTcpSocket *client;
-    Model *model;
+    QTcpSocket* client;
+    Model* model;
     QHostAddress serverAddress;
     quint16 serverPort;
     bool connectionError;

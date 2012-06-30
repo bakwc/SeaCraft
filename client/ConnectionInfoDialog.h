@@ -28,7 +28,7 @@ public slots:
     void accept();
 
 protected:
-    bool eventFilter( QObject* object, QEvent* event);
+    bool eventFilter( QObject* object, QEvent* event );
 
 private:
     QLineEdit* addressTextBox;
