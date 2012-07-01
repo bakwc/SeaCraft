@@ -32,6 +32,7 @@ public:
 protected:
     void paintEvent( QPaintEvent* event );
     void mousePressEvent( QMouseEvent* ev );
+    void closeEvent( QCloseEvent* event );
 
 private slots:
     void redraw();

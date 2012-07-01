@@ -136,6 +136,12 @@ void MainWindow::mousePressEvent( QMouseEvent* ev )
     controller->onMousePressed( pos, ev->button() == Qt::LeftButton );
 }
 
+void MainWindow::closeEvent( QCloseEvent* event )
+{
+    controller->onGameQuit();
+    event->accept();
+}
+
 void MainWindow::on_actionStart_activated()
 {
     ConnectionInfoDialog* connectionDialog = new ConnectionInfoDialog( this );
@@ -169,8 +175,7 @@ void MainWindow::redraw()
 
 void MainWindow::on_actionQuit_triggered()
 {
-    controller->onGameQuit();
-    this->close();
+    close();
 }
 
 void MainWindow::on_actionClear_triggered()
