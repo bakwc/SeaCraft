@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QVector>
-#include "constants.h"
+#include "Constants.h"
 
 class Field
 {
@@ -41,6 +41,7 @@ public:
     void showField() const;
 
 private:
+    void convertField();
     Cell getCellPrivate( int x, int y, const Cells& cells ) const;
     void setCellPrivate( int x, int y, Cell cell, Cells& cells ) const;
 
