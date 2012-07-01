@@ -17,11 +17,13 @@ SOURCES += main.cpp \
     Server.cpp \
     Application.cpp \
     Client.cpp \
-    Field.cpp
+    Field.cpp \
+    Statistics.cpp
 
 HEADERS += \
     Server.h \
     Application.h \
     constants.h \
     Client.h \
-    Field.h
+    Field.h \
+    Statistics.h

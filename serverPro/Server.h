@@ -5,6 +5,7 @@
 #include <QtNetwork/QTcpServer>
 #include "constants.h"
 #include "Client.h"
+#include "Statistics.h"
 
 class Server : public QObject
 {
@@ -72,9 +73,14 @@ private:
         const QString& password
     );
     bool registerUserLogin( const QString& login, const QString& password );
+    void recordSessionStatistic(
+        const QString& winner,
+        const QString& looser
+    );
 
 private:
     QTcpServer* tcpServer_;
+    bool spawned_;
     bool guestAllowed_;
     bool registrationAllowed_;
     QHostAddress address_;
@@ -82,4 +88,5 @@ private:
     QString authFile_;
     QString statFile_;
     Clients clients_;
+    Statistics stats_;
 };

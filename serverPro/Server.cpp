@@ -8,6 +8,7 @@ const int PROTOCOL_VERSION = Server::PV_BETA;
 Server::Server( QObject* parent ):
     QObject( parent ),
     tcpServer_( new QTcpServer(this) ),
+    spawned_( false ),
     guestAllowed_( false ),
     registrationAllowed_( true ),
     address_( DEFAULT_SERVER_ADDRESS ),
@@ -25,6 +26,10 @@ Server::Server( QObject* parent ):
 
 Server::~Server()
 {
+    if( spawned_ )
+        stats_.save( statFile_ );
+
+    spawned_ = false;
 }
 
 bool Server::spawn()
@@ -52,12 +57,16 @@ bool Server::spawn( const QHostAddress& address, quint16 port )
     }
 
     startTimer( DEFAULT_SEARCH_INTERVAL );
+    stats_.load( statFile_ );
+    spawned_ = true;
 
-    qDebug(
-        "Server spawned at %s:%d",
-        qPrintable(address.toString()),
-        port
-    );
+    qDebug( "Server spawned at %s:%d", qPrintable(address.toString()), port );
+
+    if( guestAllowed_ )
+        qDebug( "Guest account enabled.");
+
+    if( !registrationAllowed_ )
+        qDebug( "User registration disabled." );
 
     return true;
 }
@@ -353,6 +362,11 @@ bool Server::stateRecieveSteps( const QString& cmd, ClientsIterator client )
             client->send( "win:" );
             client->playingWith->send( "lose:" );
 
+            recordSessionStatistic(
+                client->login,
+                client->playingWith->login
+            );
+
             disconnectClient( client->playingWith );
             disconnectClient( client );
             return true;
@@ -375,10 +389,22 @@ bool Server::stateRecieveStatus( const QString& cmd, ClientsIterator client )
         return false;
 
     if( client->status == Client::ST_MAKING_STEP )
+    {
         client->playingWith->send( "win:" );
+        recordSessionStatistic(
+            client->playingWith->login,
+            client->login
+        );
+    }
     else
     if( client->status == Client::ST_WAITING_STEP )
+    {
         client->playingWith->send( "lose:" );
+        recordSessionStatistic(
+            client->login,
+            client->playingWith->login
+        );
+    }
 
     disconnectClient( client );
     if( client->playingWith != clients_.end() )
@@ -407,7 +433,7 @@ Server::CheckUserStatus Server::checkUserLogin(
     const QString& password
 )
 {
-    if( login == "guest" )
+    if( login == "guest" && guestAllowed_ )
         return CUS_OK;
 
     if( !QFile::exists(authFile_) )
@@ -465,4 +491,16 @@ bool Server::registerUserLogin( const QString& login, const QString& password )
     af.write( qPrintable(QString("%1:%2:\n").arg(login).arg(password)) );
     af.close();
     return true;
+}
+
+void Server::recordSessionStatistic(
+    const QString& winner,
+    const QString& looser
+)
+{
+    // TODO: add additional checks
+    stats_.playerWon( winner );
+    stats_.playerLost( looser );
+
+    stats_.save( statFile_ );
 }
