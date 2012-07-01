@@ -2,8 +2,6 @@ SeaCraft
 ========
 Sea battle client and server. Our website is http://seacraft.i-port.su/
 
-For now **client** will _not_ works correct with **server**.
-
 #### Client usage
 Use your mouse to setup ships -- _left-click_ to set part of it, _right-click_ to clear.
 Also you can fill the field randomly.
