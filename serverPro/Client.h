@@ -28,7 +28,7 @@ public:
     QString login;
 
     void setField( const QString& field, int shipSize );
-    const Field* field() const;
+    Field* field();
 
 private:
     Field* field_;

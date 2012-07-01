@@ -311,13 +311,60 @@ bool Server::stateRecieveSteps( const QString& cmd, ClientsIterator client )
     if( client->status != Client::ST_MAKING_STEP )
         return false;
 
+    qDebug() << "User" << client->login << "is making step";
+
     int x = rx.cap( 1 ).toInt();
     int y = rx.cap( 2 ).toInt();
-    QString response1;
-    QString response2;
 
-    Field::Cell current = client->playingWith->field()->getCell( x, y );
+    QString response;
+    Field* enemyField = client->playingWith->field();
+    Field::Cell current = enemyField->getCell( x, y );
 
+    if(
+        (current != Field::CI_CLEAR && current > Field::CellShipsTypeCount) ||
+        x < 0 || y < 0 ||
+        x >= enemyField->getFieldLength() ||
+        y >= enemyField->getFieldLength()
+    )
+    {
+        client->send( "wrongstep:" );
+        return true;
+    }
+
+    if( current == Field::CI_CLEAR )
+    {
+        client->field()->setCell( x, y, Field::CI_DOT );
+        response = QString( "field:miss:%1:%2:" ).arg( x ).arg( y );
+        client->send( response );
+        client->playingWith->send( response );
+        client->playingWith->send( "go:" );
+
+        client->status = Client::ST_WAITING_STEP;
+        client->playingWith->status = Client::ST_MAKING_STEP;
+        return true;
+    }
+
+    response = QString( "field:half:%1:%2:" ).arg( x ).arg( y );
+
+    if( enemyField->damageShip(x, y) )
+    {
+        if( enemyField->isAllKilled() )
+        {
+            client->send( "win:" );
+            client->playingWith->send( "lose:" );
+
+            disconnectClient( client->playingWith );
+            disconnectClient( client );
+            return true;
+        }
+
+        response = QString( "field:kill:%1:%2:" ).arg( x ).arg( y );
+    }
+
+    client->field()->setCell( x, y, Field::CI_DAMAGED );
+    client->send( response );
+    client->playingWith->send( response );
+    client->send( "go:" );
     return true;
 }
 
@@ -327,7 +374,16 @@ bool Server::stateRecieveStatus( const QString& cmd, ClientsIterator client )
     if( rx.indexIn(cmd) == -1 )
         return false;
 
+    if( client->status == Client::ST_MAKING_STEP )
+        client->playingWith->send( "win:" );
+    else
+    if( client->status == Client::ST_WAITING_STEP )
+        client->playingWith->send( "lose:" );
+
     disconnectClient( client );
+    if( client->playingWith != clients_.end() )
+        disconnectClient( client->playingWith );
+
     qDebug() << "User" << client->login << "is disconnected";
     return true;
 }

@@ -24,7 +24,7 @@ void Client::setField( const QString& field, int shipSize )
     field_->initField( field );
 }
 
-const Field* Client::field() const
+Field* Client::field()
 {
     return field_;
 }
