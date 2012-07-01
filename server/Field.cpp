@@ -242,11 +242,7 @@ bool Field::isAllKilled() const
 
 int Field::getShipsCount() const
 {
-    int count = 0;
-    for( int i = 1, shipSize = shipSize_; i <= shipSize_; i++, shipSize-- )
-        count += i*shipSize;
-
-    return count;
+    return shipSize_ * (shipSize_ + 1) / 2;
 }
 
 void Field::addKilledShip( int shipSize )
@@ -257,77 +253,76 @@ void Field::addKilledShip( int shipSize )
     killedShips_[ shipSize - 1 ]++;
 }
 
-// Mark part of the ship as damaged
-// TODO: needs to be refactored
-// Returns true if ship is killed
-bool Field::damageShip( int x, int y )
+// Make damage to the ship at point
+// TODO: needs to be rewrite
+// Param:   killShots   coordinates of the damaged parts of the ship
+// Return:  true        if ship was killed
+bool Field::makeShot( int x, int y, Shots& killShots )
 {
+    killShots.clear();
     Cell cell = getCell( x, y );
-    if(
-        cell == CI_CLEAR || cell > CellShipsTypeCount
-    )
+    if( cell == CI_CLEAR || cell >= CellShipsTypeCount )
         return false;
 
     if( cell == CI_CENTER )
     {
-        setCell( x, y, CI_DAMAGED );
-        addKilledShip( 1 );
+        killShots.push_back( QPoint(x, y) );
+        addKilledShip( CI_CENTER );
         return true;
     }
 
     bool vertical = cell == CI_VMIDDLE || cell == CI_TOP || cell == CI_BOTTOM;
-
-    int p = x;
-    int q = y;
-
-    int damaged = 0;
-    int i = 1;
     int shipSize = 0;
+    int k = 1;
+    int p, q;
+
+    // forward
     do
     {
-        cell = getCell( p + !vertical * i, q + vertical * i );
-        i++;
-
-        if( cell == CI_CLEAR )
+        p = x + !vertical * k;
+        q = y + vertical * k;
+        cell = getCell( p, q );
+        if(
+            cell == CI_CLEAR ||
+            (cell >= CellShipsTypeCount && cell != CI_DAMAGED)
+        )
             break;
 
-        shipSize++;
-
         if( cell == CI_DAMAGED )
-        {
-            damaged++;
-            continue;
-        }
-    }
-    while( cell == CI_VMIDDLE || cell == CI_HMIDDLE );
+            killShots.push_back( QPoint(p, q) );
 
-    i = 1;
+        shipSize++;
+        k++;
+    }
+    while( cell != CI_CLEAR || cell < CellShipsTypeCount );
+
+    k = 1;
+    // backward
     do
     {
-        cell = getCell( p - !vertical * i, q - vertical * i );
-        i++;
-
-        if( cell == CI_CLEAR )
+        p = x - !vertical * k;
+        q = y - vertical * k;
+        cell = getCell( p, q );
+        if(
+            cell == CI_CLEAR ||
+            (cell >= CellShipsTypeCount && cell != CI_DAMAGED)
+        )
             break;
 
-        shipSize++;
-
         if( cell == CI_DAMAGED )
-        {
-            damaged++;
-            continue;
-        }
+            killShots.push_back( QPoint(p, q) );
+
+        k++;
+        shipSize++;
     }
-    while( cell == CI_VMIDDLE || cell == CI_HMIDDLE );
+    while( cell != CI_CLEAR || cell < CellShipsTypeCount );
 
     shipSize++;
-    damaged++;
+    killShots.push_back( QPoint(x, y) );
 
-    setCell( x, y, CI_DAMAGED );
+    if( shipSize != killShots.size() )
+        return false;
 
-    if( shipSize == damaged )
-        addKilledShip( shipSize );
-
-    return shipSize == damaged;
+    addKilledShip( shipSize );
+    return true;
 }
-

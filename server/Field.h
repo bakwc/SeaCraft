@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QVector>
+#include <QStack>
+#include <QPoint>
 #include "Constants.h"
 
 class Field
@@ -23,6 +25,7 @@ public:
 
     typedef QVector<Cell> Cells;
     typedef QVector<int> ShipsTypeList;
+    typedef QStack<QPoint> Shots;
 
 public:
     Field( int shipSize = DEFAULT_SHIP_SIZE );
@@ -35,7 +38,7 @@ public:
     int getFieldSize() const;
     int getShipsCount() const;
     bool isAllKilled() const;
-    bool damageShip( int x, int y );
+    bool makeShot( int x, int y, Shots& killShots );
     void addKilledShip( int shipSize );
 
     void showField() const;

@@ -304,10 +304,9 @@ bool Server::stateRecieveField( const QString& cmd, ClientsIterator client )
         client->send( "wrongfield:" );
         qDebug() << "User" << client->login << "passed wrong field";
         client->field()->showField();
+        disconnectClient( client );
         return true;
     }
-
-    client->field()->showField();
 
     client->status = Client::ST_READY;
     return true;
@@ -327,7 +326,7 @@ bool Server::stateRecieveSteps( const QString& cmd, ClientsIterator client )
     int x = rx.cap( 1 ).toInt();
     int y = rx.cap( 2 ).toInt();
 
-    QString response;
+    QString response1, response2;
     Field* enemyField = client->playingWith->field();
     Field::Cell current = enemyField->getCell( x, y );
 
@@ -342,44 +341,59 @@ bool Server::stateRecieveSteps( const QString& cmd, ClientsIterator client )
         return true;
     }
 
-    if( current == Field::CI_CLEAR )
-    {
-        client->field()->setCell( x, y, Field::CI_DOT );
-        response = QString( "field:miss:%1:%2:" ).arg( x ).arg( y );
-        client->send( response );
-        client->playingWith->send( response );
-        client->playingWith->send( "go:" );
+    Field::Shots killShots;
+    bool isKilled = enemyField->makeShot( x, y, killShots );
+    bool isMissed = killShots.isEmpty();
+    QString type = isKilled ? "kill" : "half";
+    Field::Cell cell = isMissed ? Field::CI_DOT : Field::CI_DAMAGED;
 
+    if( isMissed )
+    {
+        enemyField->setCell( x, y, cell );
         client->status = Client::ST_WAITING_STEP;
         client->playingWith->status = Client::ST_MAKING_STEP;
+
+        response1 = QString( "field2:miss:%1:%2:" ).arg( x ).arg( y );
+        response2 = QString( "field1:miss:%1:%2:" ).arg( x ).arg( y );
+
+        client->send( response1 );
+        client->playingWith->send( response2 );
+        client->playingWith->send( "go:" );
         return true;
     }
 
-    response = QString( "field:half:%1:%2:" ).arg( x ).arg( y );
-
-    if( enemyField->damageShip(x, y) )
+    for( int i = 0; i < killShots.size(); i++ )
     {
-        if( enemyField->isAllKilled() )
-        {
-            client->send( "win:" );
-            client->playingWith->send( "lose:" );
+        response1 = QString( "field2:%1:%2:%3:" )
+            .arg( type )
+            .arg( killShots.at(i).x() )
+            .arg( killShots.at(i).y() );
+        response2 = QString( "field1:%1:%2:%3:" )
+            .arg( type )
+            .arg( killShots.at(i).x() )
+            .arg( killShots.at(i).y() );
 
-            recordSessionStatistic(
-                client->login,
-                client->playingWith->login
-            );
-
-            disconnectClient( client->playingWith );
-            disconnectClient( client );
-            return true;
-        }
-
-        response = QString( "field:kill:%1:%2:" ).arg( x ).arg( y );
+        client->send( response1 );
+        client->playingWith->send( response2 );
     }
 
-    client->field()->setCell( x, y, Field::CI_DAMAGED );
-    client->send( response );
-    client->playingWith->send( response );
+    enemyField->setCell( x, y, cell );
+
+    if( enemyField->isAllKilled() )
+    {
+        client->send( "win:" );
+        client->playingWith->send( "lose:" );
+
+        recordSessionStatistic(
+            client->login,
+            client->playingWith->login
+        );
+
+        disconnectClient( client->playingWith );
+        disconnectClient( client );
+        return true;
+    }
+
     client->send( "go:" );
     return true;
 }
@@ -390,21 +404,15 @@ bool Server::stateRecieveStatus( const QString& cmd, ClientsIterator client )
     if( rx.indexIn(cmd) == -1 )
         return false;
 
-    if( client->status == Client::ST_MAKING_STEP )
+    if(
+        client->status == Client::ST_MAKING_STEP ||
+        client->status == Client::ST_WAITING_STEP
+    )
     {
         client->playingWith->send( "win:" );
         recordSessionStatistic(
             client->playingWith->login,
             client->login
-        );
-    }
-    else
-    if( client->status == Client::ST_WAITING_STEP )
-    {
-        client->playingWith->send( "lose:" );
-        recordSessionStatistic(
-            client->login,
-            client->playingWith->login
         );
     }
 
