@@ -162,12 +162,12 @@ void Server::connectTwoClients(
     client2->playingWith = client1;
     client1->socket->write(
         qPrintable(
-            QString("found:%s:").arg(client2->login)
+            QString("found:%1:").arg(client2->login)
         )
     );
     client2->socket->write(
         qPrintable(
-            QString("found:%s:").arg(client1->login)
+            QString("found:%1:").arg(client1->login)
         )
     );
     client1->socket->write( "go:" );
