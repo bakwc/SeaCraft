@@ -1,55 +1,78 @@
-﻿    Server
+﻿Server
+------
 * searches for players
 * establishes connections between players
 * resends player's moves
 * checks correctness of moves
 
-    Client
+Client
+------
 * user interface
-* API for palcing ships
+* API for placing ships
 * connection to server and playing matches
 
-    Session
+Session
+-------
+'>N ' or '>> ' -- client
+'<N ' or '<< ' -- server (N - one of variants)
+'*' -- disconnection
+----------------------------------------------------------------------------->>>
+# authorize
+>> mbclient:client_protocol_version:login:password:
+<1 wrongver:                                        *
+<2 wronguser:                                       *
+<3 alreadyauth:
+<4 mbserver:server_protocol_version:
 
-> mbclient:1:SuperBot:119xoOlh%2:
-< mbserver:1:
-> field:001001011100...001101011:
-< found:
-< go:
-> step:4:3:
-< field2:miss:4:3:
-< field1:miss:6:8:
-< go:
-> step:2:7:
-< field2:half:2:7:
-< go:
-> step:2:8:
-< field2:miss:2:8:
-< field1:half:3:2:
-< field1:half:3:3:
-< field1:kill:3:4:
-< field1:miss:6:4:
-< go:
-…
-< win:
-disconnect
+# recieve field
+>> field:ship_size:010001000...000010001:
+<1 wrongfield:                                      *
 
+# send opponent info
+<< found:enemy_login:
+<< go:
 
-    Session's description
+# recieve steps
+>> step:4:3:
+<1 wrongstep:
+<2 field1:miss:4:3:
+<2 field2:miss:4:3:
+<3 field1:half:4:3:
+<4 field1:kill:4:3:
+<4 field1:kill:4:2:
+<4 field1:kill:4:1:
 
-1) Client says a string: ':mbclient:client_protocol_number:login:password:'
+# send status
+<1 go:
+<2 win:                                             *
+<3 lose:                                            *
+
+>> disconnect:                                      *
+-----------------------------------------------------------------------------<<<
+
+Session's description
+---------------------
+1) Client says a string:
+        ':mbclient:client_protocol_version:login:password:'
   * protocol is a positive number
   * login & password are strings of latin latters and digits, specific symbols
-2) Server says: 'mbserver:server_protocol_number:' (positive number)
-3) client says: 'field:ships_location:'
+2) Server says:
+        'mbserver:server_protocol_number:' (positive number)
+3) Client says:
+        'field:ship_size:ships_location:'
+  * ship_size may be from 1 to 10. The field size depends on it.
+    Default 4. So field size will be 100. Formula: (ship_size*(ship_size+1)/2)^2
   * 1 — ship is located here, 0 — no ship in this cell
   * from left to right, from top to bottom
-4) Server says 'found:' if an opponent was found.
+4) Server says 'found:enemy_login:' if an opponent was found.
 5) Server says 'go:' if client should make a move.
 6) Client says 'step:cell_X:cell_Y:'
   * cell_X,cell_y from >=0 and <= 9
 7) Server says 'field2:hits_info:cell_X:cell_Y:'.
-  * hits info --- one of three alternatives: miss, half – ship was hurted, kill – ship was died.
+  * hits info --- one of three alternatives:
+    miss,
+    half – ship was hurted,
+    kill – ship was died.
   This is an information did player hit some ships.
 8) Server says: 'field1:hits_info:cell_X:cell_Y:'.
 9) After finishing a game server says 'win:' or 'lose:' and closes connection.
@@ -59,7 +82,6 @@ disconnect
 12) In case of illegal login or password
 	server says 'wronguser:' and closes connection.
 13) On protocol version mismatch server says 'wrongver:' and closes connection.
-
 
 
 1010010100101001010010100101001010010100101001010010100101001010010100101001010010100101001010010100

@@ -1,18 +1,11 @@
-#include <QCoreApplication>
-#include <QtNetwork/QTcpServer>
-#include <QObject>
-#include <QDebug>
-#include "MainServer.h"
+#include "Application.h"
 
-int main( int argc, char* argv[] )
+int main( int argc, char *argv[] )
 {
-    QCoreApplication a( argc, argv );
-    MainServer mserver;
+    Application app( argc, argv );
 
-    mserver.parceCmdLine( a.arguments() );
+    if( !app.init() )
+        return 1;
 
-    if( !mserver.spawn() )
-        return 0;
-
-    return a.exec();
+    return app.exec();
 }

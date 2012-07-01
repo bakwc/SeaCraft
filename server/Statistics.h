@@ -15,13 +15,13 @@ struct PlayerStats
 class Statistics
 {
 public:
-    void save(const QString& fname);
-    void load(const QString& fname);
-    void playerWon(const QString& login);
-    void playerLost(const QString& login);
+    void save( const QString& fname );
+    void load( const QString& fname );
+    void playerWon( const QString& login );
+    void playerLost( const QString& login );
 private:
-    void checkPlayer(const QString& login);
-            // Check for player and add it if not exists
+    void checkPlayer( const QString& login );
+    // Check for player and add it if not exists
 private:
-    QMap<QString,PlayerStats> data;
+    QMap<QString, PlayerStats> data;
 };

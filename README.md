@@ -7,12 +7,13 @@ Use your mouse to setup ships -- _left-click_ to set part of it, _right-click_ t
 Also you can fill the field randomly.
 
 #### Server command line arguments
-- --address - specify server addr to spawn (default '0.0.0.0')
-- --port - and port (default 1234)
-- --authfile - specify file with authorization info (default 'authorized')
-- --statfile - specify file with statistic to save to (default 'stats')
+- -s, --statfile [*FILE*]  -- use FILE for statistic (default '**stats**')
+- -u, --authfile [*FILE*]  -- use FILE for authorized users (default '**authorized**')
+- -a, --address  [*ADDR*]  -- server address to spawn to (default '**0.0.0.0**')
+- -p, --port [*PORT*]      -- and it's port (default **1234**)
+- -g, --allowguest         -- allow guest accounts
+- -r, --disablereg         -- disallow registration
 
-PS: For now, *authfile* is _not_ created automatically. You should create it first.
 
 Format of the *authfile* is simple:
 

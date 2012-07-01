@@ -10,7 +10,7 @@ void Images::load()
     images.insert( "redfull", QImage(":/redfull.png") );
 }
 
-QImage& Images::get(const QString& imgName)
+QImage& Images::get( const QString& imgName )
 {
     QMap<QString, QImage>::iterator i = images.find( imgName );
 

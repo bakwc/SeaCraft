@@ -3,5 +3,5 @@
 #include <QDebug>
 #include "Defines.h"
 
-QPoint getMyFieldCoord(const QPoint& pos);
-QPoint getEnemyFieldCoord(const QPoint& pos);
+QPoint getMyFieldCoord( const QPoint& pos );
+QPoint getEnemyFieldCoord( const QPoint& pos );
