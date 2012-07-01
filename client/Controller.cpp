@@ -111,7 +111,8 @@ void Controller::onMousePressed( const QPoint& pos, bool setShip )
             return;
 
         qDebug() << "Going to" << point.x() << point.y();
-        model->setEnemyCell( point.x(), point.y(), CL_DOT );
+        if( model->getEnemyCell(point.x(), point.y()) == CL_CLEAR )
+            model->setEnemyCell( point.x(), point.y(), CL_DOT );
 
         QString cmd;
         cmd = QString( "step:%1:%2:" ).arg( point.x() ).arg( point.y() );
@@ -134,105 +135,103 @@ void Controller::onDataReceived()
 
 void Controller::parseData( const QString& data )
 {
-    parseGo( data );
+    parseWrongField( data );
+    parseWrongStep( data );
     parseFields( data );
+    parseGo( data );
     parseGameResult( data );
     parseErrorInfo( data );
+}
+
+bool Controller::parseFound( const QString& data )
+{
+    QRegExp rx( "found:((\\w|\\d)+):" );
+
+    if( rx.indexIn(data) == -1 )
+        return false;
+
+    qDebug() << "Found opponent:" << rx.cap( 1 );
+    emit gameOpponent( rx.cap(1) );
+    return true;
 }
 
 bool Controller::parseGo( const QString& data )
 {
     QRegExp rx( "go:" );
 
-    if( rx.indexIn(data) != -1 )
-    {
-        model->setState( ST_MAKING_STEP );
-        qDebug() << "Now making step!";
-        return true;
-    }
+    if( rx.indexIn(data) == -1 )
+        return false;
 
-    return false;
+    qDebug() << "Now making step!";
+    model->setState( ST_MAKING_STEP );
+    return true;
 }
 
 bool Controller::parseErrorInfo( const QString& data )
 {
     QRegExp rx( "wronguser:" );
 
-    if( rx.indexIn(data) != -1 )
-    {
-        model->setState( ST_PLACING_SHIPS );
-        connectionError = true;
-        emit gameError( GEM_WRONG_USER );
-        qDebug() << "Wrong user";
-        return true;
-    }
+    if( rx.indexIn(data) == -1 )
+        return false;
 
-    return false;
+    qDebug() << "Wrong user";
+    model->setState( ST_PLACING_SHIPS );
+    connectionError = true;
+    emit gameError( GEM_WRONG_USER );
+    return true;
+}
+
+bool Controller::parseWrongStep( const QString& data )
+{
+    QRegExp rx( "wrongstep:" );
+
+    if( rx.indexIn(data) == -1 )
+        return false;
+
+    qDebug() << "Maked wrong step";
+    model->setState( ST_MAKING_STEP );
+    return true;
+}
+
+bool Controller::parseWrongField( const QString& data )
+{
+    QRegExp rx( "wrongfield:" );
+
+    if( rx.indexIn(data) == -1 )
+        return false;
+
+    qDebug() << "Maked wrong field";
+    model->setState( ST_PLACING_SHIPS );
+    return true;
 }
 
 bool Controller::parseFields( const QString& data )
 {
     QRegExp rx( "field(\\d):(\\w+):(\\d):(\\d):" );
 
-    if( rx.indexIn(data) != -1 )
+    int pos = 0;
+    while( (pos = rx.indexIn(data, pos)) != -1 )
     {
-        qDebug() << "Field:" << rx.cap( 1 );
-        qDebug() << "Status:" << rx.cap( 2 );
-        qDebug() << "X:" << rx.cap( 3 );
-        qDebug() << "Y:" << rx.cap( 4 );
+        const QString& type = rx.cap( 2 );
+        int field = rx.cap( 1 ).toInt();
+        int xpos = rx.cap( 3 ).toInt();
+        int ypos = rx.cap( 4 ).toInt();
 
-        if( rx.cap(1) == "2" )
-        {
-            if( rx.cap(2) == "half" )
-                model->setEnemyCell(
-                    rx.cap(3).toInt(),
-                    rx.cap(4).toInt(),
-                    CL_HALF
-                );
+        Cell cell = type == "half"
+            ? CL_HALF
+            : type == "kill"
+            ? CL_HALF
+            : CL_DOT;
 
-            if( rx.cap(2) == "kill" )
-                model->setEnemyCell(
-                    rx.cap(3).toInt(),
-                    rx.cap(4).toInt(),
-                    CL_SHIP
-                );
+        if( field == 2 )
+            model->setEnemyCell( xpos, ypos, cell );
+        else
+            model->setMyCell( xpos, ypos, cell );
 
-            if( rx.cap(2) == "miss" )
-                model->setEnemyCell(
-                    rx.cap(3).toInt(),
-                    rx.cap(4).toInt(),
-                    CL_DOT
-                );
-        }
-
-        if( rx.cap(1) == "1" )
-        {
-            if( rx.cap(2) == "half" )
-                model->setMyCell(
-                    rx.cap(3).toInt(),
-                    rx.cap(4).toInt(),
-                    CL_HALF
-                );
-
-            if( rx.cap(2) == "kill" )
-                model->setMyCell(
-                    rx.cap(3).toInt(),
-                    rx.cap(4).toInt(),
-                    CL_SHIP
-                );
-
-            if( rx.cap(2) == "miss" )
-                model->setMyCell(
-                    rx.cap(3).toInt(),
-                    rx.cap(4).toInt(),
-                    CL_DOT
-                );
-        }
-
-        return true;
+        pos += rx.matchedLength();
     }
 
-    return false;
+    return pos;
 }
 
 bool Controller::parseGameResult( const QString& data )
@@ -293,7 +292,7 @@ void Controller::onGameQuit()
     if( client->state() == QAbstractSocket::ConnectedState )
     {
         qDebug() << "Disconnecting from host";
-        // TODO: send to server information about quiting from game
+        client->write( "disconnect:" );
         client->disconnectFromHost();
         model->setState( ST_PLACING_SHIPS );
     }
@@ -381,7 +380,7 @@ void Controller::onConnected()
     QString request;
     connectionError = false;
 
-    request = QString( "mbclient:1:%1:%2:" )
+    request = QString( "mbclient:2:%1:%2:" )
         .arg( model->getLogin() )
         .arg( model->getPassword() );
 
@@ -396,7 +395,7 @@ void Controller::onConnected()
     response = client->readAll();
     qDebug() << response;
 
-    request = "field:" + model->getMyField() + ":";
+    request = "field:4:" + model->getMyField() + ":";
     client->write( request.toLocal8Bit() );
 
     qDebug() << request;

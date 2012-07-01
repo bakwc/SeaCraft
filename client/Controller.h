@@ -52,6 +52,7 @@ signals:
     void stateChanged();
     void gameResult( GameResult result );
     void gameError( GameErrorMessage message );
+    void gameOpponent( const QString& name );
 
 private slots:
     void onDataReceived();
@@ -60,11 +61,14 @@ private slots:
 
 private:
     void parseData( const QString& data );
+    bool parseFound( const QString& data );
     bool parseGo( const QString& data );
     bool parseGameResult( const QString& data );
     bool parseFields( const QString& data );
-    void placeShipAtRandom( int size );
     bool parseErrorInfo( const QString& data );
+    bool parseWrongStep( const QString& data );
+    bool parseWrongField( const QString& data );
+    void placeShipAtRandom( int size );
     void readConfig();
     void saveConfig();
 
