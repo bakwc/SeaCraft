@@ -19,6 +19,38 @@ Field::Field( int shipSize ):
     killedShips_.fill( 0, shipSize_ );
 }
 
+// Converting field from [0-1] (old version) to [0-7]
+void Field::convertField()
+{
+    Cell cell;
+    bool bLeft, bRight, bTop, bBottom;
+    for( int i = 0; i < fieldLength_; i++ )
+        for( int j = 0; j < fieldLength_; j++ )
+        {
+            cell = getCell( i, j );
+            if( cell == CI_CLEAR || cell > CI_CENTER )
+                continue;
+
+            bLeft = getCell( i - 1, j ) != CI_CLEAR;
+            bRight = getCell( i + 1, j ) != CI_CLEAR;
+            bTop = getCell( i, j - 1 ) != CI_CLEAR;
+            bBottom = getCell( i, j + 1 ) != CI_CLEAR;
+
+            cell = bLeft && bRight
+                ? CI_HMIDDLE : !bLeft && !bRight
+                ? CI_CENTER : bLeft
+                ? CI_RIGHT : CI_LEFT;
+
+            if( cell == CI_CENTER )
+                cell = bTop && bBottom
+                    ? CI_VMIDDLE : !bTop && !bBottom
+                    ? CI_CENTER : bTop
+                    ? CI_BOTTOM : CI_TOP;
+
+            setCell( i, j, cell );
+        }
+}
+
 void Field::initField( const QString& stringField )
 {
     field_.clear();
@@ -42,6 +74,8 @@ void Field::initField( const QString& stringField )
 
     for( int i = 0; i < nSize; i++ )
         field_.push_back( CI_CLEAR );
+
+    convertField();
 }
 
 void Field::showField() const
@@ -223,6 +257,9 @@ void Field::addKilledShip( int shipSize )
     killedShips_[ shipSize - 1 ]++;
 }
 
+// Mark part of the ship as damaged
+// TODO: needs to be refactored
+// Returns true if ship is killed
 bool Field::damageShip( int x, int y )
 {
     Cell cell = getCell( x, y );

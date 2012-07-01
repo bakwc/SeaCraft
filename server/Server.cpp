@@ -63,7 +63,7 @@ bool Server::spawn( const QHostAddress& address, quint16 port )
     qDebug( "Server spawned at %s:%d", qPrintable(address.toString()), port );
 
     if( guestAllowed_ )
-        qDebug( "Guest account enabled.");
+        qDebug( "Guest account enabled." );
 
     if( !registrationAllowed_ )
         qDebug( "User registration disabled." );
@@ -306,6 +306,8 @@ bool Server::stateRecieveField( const QString& cmd, ClientsIterator client )
         client->field()->showField();
         return true;
     }
+
+    client->field()->showField();
 
     client->status = Client::ST_READY;
     return true;

@@ -23,7 +23,7 @@ SOURCES += main.cpp \
 HEADERS += \
     Server.h \
     Application.h \
-    constants.h \
     Client.h \
     Field.h \
-    Statistics.h
+    Statistics.h \
+    Constants.h
