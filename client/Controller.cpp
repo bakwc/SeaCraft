@@ -135,6 +135,7 @@ void Controller::onDataReceived()
 
 void Controller::parseData( const QString& data )
 {
+    parseFound( data );
     parseWrongField( data );
     parseWrongStep( data );
     parseFields( data );

@@ -11,7 +11,9 @@ MainWindow::MainWindow( QWidget* parent ):
     pictures = new Images;
     pictures->load();
 
-    ui->label->setStyleSheet( "QLabel { color : #00157f; }" );
+    ui->labelStatus->setStyleSheet( "QLabel { color : #00157f; }" );
+    ui->labelOpponent->setStyleSheet( "QLabel { color : #00157f; }" );
+    ui->labelOpponent->clear();
     model = new Model;
     controller = new Controller( model );
 
@@ -28,6 +30,12 @@ MainWindow::MainWindow( QWidget* parent ):
         this,
         SLOT(showGameError(GameErrorMessage))
     );
+    connect(
+        controller,
+        SIGNAL(gameOpponent(QString)),
+        this,
+        SLOT(changeGameOpponent(QString))
+    );
 }
 
 MainWindow::~MainWindow()
@@ -40,7 +48,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::setStatus( const QString& status )
 {
-    ui->label->setText( "Status: " + status );
+    ui->labelStatus->setText( tr("Status: ") + status );
+}
+
+void MainWindow::changeGameOpponent( const QString& name )
+{
+    ui->labelOpponent->setText( tr("Opponent: ") + name );
 }
 
 void MainWindow::paintEvent( QPaintEvent* event )
@@ -154,10 +167,7 @@ void MainWindow::on_actionStart_activated()
     connectionDialog->setLogin( controller->getUserLogin() );
 
     if( connectionDialog->exec() != QDialog::Accepted )
-    {
-        qDebug() << "ConnectionDialog::rejected";
         return;
-    }
 
     controller->setConnectionInfo(
         connectionDialog->getAddress(),
@@ -170,6 +180,8 @@ void MainWindow::on_actionStart_activated()
 
 void MainWindow::redraw()
 {
+    if( controller->getState() == ST_PLACING_SHIPS )
+        ui->labelOpponent->clear();
     this->update();
 }
 
