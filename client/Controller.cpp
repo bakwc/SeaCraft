@@ -1,11 +1,13 @@
 #include "Controller.h"
 
 const QString& DEFAULT_CONFIG_FILE = "config.ini";
+const quint16 DEFAULT_SERVER_PORT = 1234;
+const quint16 DEFAULT_SERVER_TIMEOUT = 5000;
 
 Controller::Controller( Model* model_ ):
     model( model_ ),
     serverAddress( QHostAddress::LocalHost ),
-    serverPort( 1234 )
+    serverPort( DEFAULT_SERVER_PORT )
 {
     client = new QTcpSocket( this );
     connect(
@@ -385,9 +387,11 @@ void Controller::onConnected()
 
     client->write( request.toLocal8Bit() );
 
-    if( !client->waitForReadyRead(5000) ) return;
+    if( !client->waitForReadyRead(DEFAULT_SERVER_TIMEOUT) )
+        return;
 
-    if( connectionError ) return;
+    if( connectionError )
+        return;
 
     response = client->readAll();
     qDebug() << response;
