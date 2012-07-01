@@ -16,6 +16,7 @@ Field::Field( int shipSize ):
         fieldLength_ += i;
 
     field_.fill( CI_CLEAR, getFieldSize() );
+    killedShips_.fill( 0, shipSize_ );
 }
 
 void Field::initField( const QString& stringField )
@@ -34,7 +35,7 @@ void Field::initField( const QString& stringField )
     )
     {
         value = ( Cell ) QString( *it ).toInt();
-        if( value >= CellSize )
+        if( value >= CellShipsTypeCount )
             value = CI_CLEAR;
         field_.push_back( value );
     }
@@ -93,9 +94,6 @@ void Field::setCellPrivate(
 
     if( n < 0 || (quint32) n > getFieldSize() )
         return;
-
-    if( cell >= CellSize )
-        cell = CI_CLEAR;
 
     cells[n] = cell;
 }
@@ -198,3 +196,101 @@ int Field::getFieldSize() const
 {
     return fieldLength_ * fieldLength_;
 }
+
+bool Field::isAllKilled() const
+{
+    int killedCount = 0;
+    for( int i = 0; i < shipSize_; i++ )
+        killedCount += killedShips_[i];
+
+    return killedCount >= getShipsCount();
+}
+
+int Field::getShipsCount() const
+{
+    int count = 0;
+    for( int i = 1, shipSize = shipSize_; i <= shipSize_; i++, shipSize-- )
+        count += i*shipSize;
+
+    return count;
+}
+
+void Field::addKilledShip( int shipSize )
+{
+    if( shipSize < 1 || shipSize > shipSize_ )
+        return;
+
+    killedShips_[ shipSize - 1 ]++;
+}
+
+bool Field::damageShip( int x, int y )
+{
+    Cell cell = getCell( x, y );
+    if(
+        cell == CI_CLEAR || cell > CellShipsTypeCount
+    )
+        return false;
+
+    if( cell == CI_CENTER )
+    {
+        setCell( x, y, CI_DAMAGED );
+        addKilledShip( 1 );
+        return true;
+    }
+
+    bool vertical = cell == CI_VMIDDLE || cell == CI_TOP || cell == CI_BOTTOM;
+
+    int p = x;
+    int q = y;
+
+    int damaged = 0;
+    int i = 1;
+    int shipSize = 0;
+    do
+    {
+        cell = getCell( p + !vertical * i, q + vertical * i );
+        i++;
+
+        if( cell == CI_CLEAR )
+            break;
+
+        shipSize++;
+
+        if( cell == CI_DAMAGED )
+        {
+            damaged++;
+            continue;
+        }
+    }
+    while( cell == CI_VMIDDLE || cell == CI_HMIDDLE );
+
+    i = 1;
+    do
+    {
+        cell = getCell( p - !vertical * i, q - vertical * i );
+        i++;
+
+        if( cell == CI_CLEAR )
+            break;
+
+        shipSize++;
+
+        if( cell == CI_DAMAGED )
+        {
+            damaged++;
+            continue;
+        }
+    }
+    while( cell == CI_VMIDDLE || cell == CI_HMIDDLE );
+
+    shipSize++;
+    damaged++;
+
+    setCell( x, y, CI_DAMAGED );
+
+    if( shipSize == damaged )
+        addKilledShip( shipSize );
+
+    return shipSize == damaged;
+}
+

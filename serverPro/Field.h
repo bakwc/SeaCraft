@@ -16,11 +16,13 @@ public:
         CI_LEFT,
         CI_RIGHT,
         CI_HMIDDLE,
-        CI_DOT,
-        CellSize
+        CellShipsTypeCount,
+        CI_DOT = 100,
+        CI_DAMAGED
     };
 
     typedef QVector<Cell> Cells;
+    typedef QVector<int> ShipsTypeList;
 
 public:
     Field( int shipSize = DEFAULT_SHIP_SIZE );
@@ -31,6 +33,10 @@ public:
     int getShipSize() const;
     int getFieldLength() const;
     int getFieldSize() const;
+    int getShipsCount() const;
+    bool isAllKilled() const;
+    bool damageShip( int x, int y );
+    void addKilledShip( int shipSize );
 
     void showField() const;
 
@@ -42,4 +48,5 @@ private:
     int shipSize_;
     int fieldLength_;
     Cells field_;
+    ShipsTypeList killedShips_;
 };
