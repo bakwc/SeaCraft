@@ -1,25 +1,29 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2012-06-21T10:07:16
+# Project created by QtCreator 2012-06-30T15:09:05
 #
 #-------------------------------------------------
 
-QT       += core
-QT       += network
+QT       += core network
 QT       -= gui
 
-TARGET = server
+TARGET    = server
 CONFIG   += console
 CONFIG   -= app_bundle
 
-TEMPLATE = app
+TEMPLATE  = app
 
 SOURCES += main.cpp \
-    MainServer.cpp \
+    Server.cpp \
+    Application.cpp \
+    Client.cpp \
     Field.cpp \
     Statistics.cpp
 
 HEADERS += \
-    MainServer.h \
+    Server.h \
+    Application.h \
+    constants.h \
+    Client.h \
     Field.h \
     Statistics.h

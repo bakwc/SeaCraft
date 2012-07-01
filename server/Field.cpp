@@ -1,128 +1,296 @@
+#include <QDebug>
+#include <QString>
+#include <qiterator.h>
 #include "Field.h"
 
-void Field::initField( const QString& initData )
-{
-    for(
-        QString::const_iterator i = initData.constBegin();
-        i < initData.constEnd();
-        i++
-    )
-        field.push_back( Cell(QString(*i).toInt()) );
+const quint16 MAX_SHIP_SIZE = 10;
 
-    killedShips = 0;
+Field::Field( int shipSize ):
+    shipSize_( shipSize ),
+    fieldLength_( 0 )
+{
+    if( shipSize > MAX_SHIP_SIZE )
+        return;
+
+    for( int i = 1; i <= shipSize; i++ )
+        fieldLength_ += i;
+
+    field_.fill( CI_CLEAR, getFieldSize() );
+    killedShips_.fill( 0, shipSize_ );
 }
 
-Cell Field::getCell( int x, int y ) const
+void Field::initField( const QString& stringField )
 {
-    int n = y * 10 + x;
+    field_.clear();
 
-    if( n >= 0 && n < field.size() )
-        return field[n];
+    int fieldSize = getFieldSize();
+    int sSize = qMin( stringField.length(), fieldSize );
+    int nSize = qMax( stringField.length(), fieldSize ) - sSize;
 
-    return CL_CLEAR;
+    Cell value;
+    for(
+        QString::const_iterator it = stringField.constBegin();
+        it < stringField.constEnd();
+        it++
+    )
+    {
+        value = ( Cell ) QString( *it ).toInt();
+        if( value >= CellShipsTypeCount )
+            value = CI_CLEAR;
+        field_.push_back( value );
+    }
+
+    for( int i = 0; i < nSize; i++ )
+        field_.push_back( CI_CLEAR );
+}
+
+void Field::showField() const
+{
+    QString str;
+    for( int y = 0; y < fieldLength_; y++ )
+    {
+        str = "";
+        for( int x = 0; x < fieldLength_; x++ )
+        {
+            str += QString( "%1" ).arg( getCell(x, y) );
+        }
+
+        qDebug() << str;
+    }
+}
+
+Field::Cell Field::getCell( int x, int y ) const
+{
+    return getCellPrivate( x, y, field_ );
 }
 
 void Field::setCell( int x, int y, Cell cell )
 {
-    int n = y * 10 + x;
-
-    if( n >= 0 && n < field.size() )
-    {
-        field[n] = cell;
-        return;
-    }
+    setCellPrivate( x, y, cell, field_ );
 }
 
-bool Field::isFieldCorrect( const QString& fieldstr )
+Field::Cell Field::getCellPrivate(
+    int x,
+    int y,
+    const Field::Cells& cells
+) const
 {
-    // TODO: 100 - width*height
-    if( fieldstr.size() != 100 )
+    int n = y * fieldLength_ + x;
+
+    if( n < 0 || (quint32) n > getFieldSize() )
+        return CI_CLEAR;
+
+    return cells[n];
+}
+
+void Field::setCellPrivate(
+    int x,
+    int y,
+    Cell cell,
+    Field::Cells& cells
+) const
+{
+    int n = y * fieldLength_ + x;
+
+    if( n < 0 || (quint32) n > getFieldSize() )
+        return;
+
+    cells[n] = cell;
+}
+
+bool Field::checkField() const
+{
+    if( field_.size() < getFieldSize() || field_.size() == 0 )
         return false;
+
+    Cells field( field_ );
+
+    QVector<int> shipsCount;
+    shipsCount.fill( 0, shipSize_ );
+
+    Cell cell;
+    int n;
+    int k;
+    bool b;
+    for( int y = 0; y < fieldLength_; y++ )
+        for( int x = 0; x < fieldLength_; x++ )
+        {
+            cell = getCellPrivate( x, y, field );
+
+            if( cell == CI_CENTER )
+            {
+                shipsCount[0]++;
+                setCellPrivate( x, y, CI_CLEAR, field );
+                continue;
+            }
+
+            if( cell == CI_TOP || cell == CI_LEFT )
+            {
+                n = 1;
+                k = 0;
+                b = cell == CI_LEFT;
+
+                do
+                {
+                    cell = getCellPrivate(
+                        x + b*(1 + k),
+                        y + !b*(1 + k),
+                        field
+                    );
+                    setCellPrivate(
+                         x + b*(1 + k),
+                         y + !b*(1 + k),
+                         CI_CLEAR,
+                         field
+                    );
+
+                    if(
+                        (cell == CI_VMIDDLE && !b) ||
+                        (cell == CI_HMIDDLE && b)
+                    )
+                    {
+                        k++;
+                        continue;
+                    }
+
+                    if(
+                        (cell == CI_BOTTOM && !b) ||
+                        (cell == CI_RIGHT && b)
+                    )
+                    {
+                        n++;
+                        break;
+                    }
+                } while( cell != CI_CLEAR );
+
+                n += k;
+
+                if( n < 2 || n > shipSize_ )
+                    return false;
+
+                shipsCount[n - 1]++;
+                setCellPrivate( x, y, CI_CLEAR, field );
+                continue;
+            }
+        }
+
+    for( int i = 1, shipSize = shipSize_; i <= shipSize_; i++, shipSize-- )
+        for( int j = 0; j < i; j++ )
+            if( shipsCount[shipSize - 1] != i )
+                return false;
 
     return true;
 }
 
-bool Field::checkField()
+int Field::getShipSize() const
 {
-    return (
-        shipNum(1) == 4 &&
-        shipNum(2) == 3 &&
-        shipNum(3) == 2 &&
-        shipNum(4) == 1
-    );
+    return shipSize_;
 }
 
-int Field::shipNum( int size ) const
+int Field::getFieldLength() const
 {
-    int shipNumber = 0;
-
-    for( int i = 0; i < 10; i++ )
-        for( int j = 0; j < 10; j++ )
-            if( isShip(size, i, j) )
-                shipNumber++;
-
-    return shipNumber;
+    return fieldLength_;
 }
 
-bool Field::isShip( int size, int x, int y ) const
+int Field::getFieldSize() const
 {
-    // left field !clear
-    if( x > 0 && getCell(x - 1, y) != CL_CLEAR )
+    return fieldLength_ * fieldLength_;
+}
+
+bool Field::isAllKilled() const
+{
+    int killedCount = 0;
+    for( int i = 0; i < shipSize_; i++ )
+        killedCount += killedShips_[i];
+
+    return killedCount >= getShipsCount();
+}
+
+int Field::getShipsCount() const
+{
+    int count = 0;
+    for( int i = 1, shipSize = shipSize_; i <= shipSize_; i++, shipSize-- )
+        count += i*shipSize;
+
+    return count;
+}
+
+void Field::addKilledShip( int shipSize )
+{
+    if( shipSize < 1 || shipSize > shipSize_ )
+        return;
+
+    killedShips_[ shipSize - 1 ]++;
+}
+
+bool Field::damageShip( int x, int y )
+{
+    Cell cell = getCell( x, y );
+    if(
+        cell == CI_CLEAR || cell > CellShipsTypeCount
+    )
         return false;
 
-    // up field !clear
-    if( y > 0 && getCell(x, y - 1) != CL_CLEAR )
-        return false;
-
-    // no ship here
-    if( getCell(x, y) == CL_CLEAR )
-        return false;
-
-    int tmp = x;
-    int num = 0;
-
-    // checking in right direction
-    while( getCell(tmp, y) != CL_CLEAR && tmp < 10 )
+    if( cell == CI_CENTER )
     {
-        tmp++;
-        num++;
-    }
-
-    if( num == size )
-    {
-        if( getCell(x, y + 1) != CL_CLEAR )
-            return false;
-
+        setCell( x, y, CI_DAMAGED );
+        addKilledShip( 1 );
         return true;
     }
 
-    tmp = y;
-    num = 0;
+    bool vertical = cell == CI_VMIDDLE || cell == CI_TOP || cell == CI_BOTTOM;
 
-    // checking in down direction
-    while( getCell(x, tmp) != CL_CLEAR && tmp < 10 )
+    int p = x;
+    int q = y;
+
+    int damaged = 0;
+    int i = 1;
+    int shipSize = 0;
+    do
     {
-        tmp++;
-        num++;
-    }
+        cell = getCell( p + !vertical * i, q + vertical * i );
+        i++;
 
-    if( num == size )
+        if( cell == CI_CLEAR )
+            break;
+
+        shipSize++;
+
+        if( cell == CI_DAMAGED )
+        {
+            damaged++;
+            continue;
+        }
+    }
+    while( cell == CI_VMIDDLE || cell == CI_HMIDDLE );
+
+    i = 1;
+    do
     {
-        if( getCell(x + 1, y) != CL_CLEAR )
-            return false;
+        cell = getCell( p - !vertical * i, q - vertical * i );
+        i++;
 
-        return true;
+        if( cell == CI_CLEAR )
+            break;
+
+        shipSize++;
+
+        if( cell == CI_DAMAGED )
+        {
+            damaged++;
+            continue;
+        }
     }
+    while( cell == CI_VMIDDLE || cell == CI_HMIDDLE );
 
-    return false;
+    shipSize++;
+    damaged++;
+
+    setCell( x, y, CI_DAMAGED );
+
+    if( shipSize == damaged )
+        addKilledShip( shipSize );
+
+    return shipSize == damaged;
 }
 
-int Field::getKilledShips()
-{
-    return killedShips;
-}
-
-void Field::addKilledShip()
-{
-    killedShips++;
-}
