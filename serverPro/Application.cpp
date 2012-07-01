@@ -53,7 +53,7 @@ bool Application::parseOptions( const QString& arg )
             << "    -p, --port [PORT]      -- and it's port "
             << "(default " << DEFAULT_SERVER_PORT << ")\n"
             << "    -g, --allowguest       -- allow guest accounts\n"
-            << "    -r, --disablereg       -- disallow registration"
+            << "    -r, --disablereg       -- disallow registration\n"
         ;
         forceQuit_ = true;
         return true;
