@@ -400,7 +400,6 @@ void Controller::placeShipAtRandom( int size )
 
 void Controller::onError( QAbstractSocket::SocketError socketError )
 {
-    Q_UNUSED( socketError );
     qDebug() << client->errorString();
 
     if(
@@ -408,6 +407,9 @@ void Controller::onError( QAbstractSocket::SocketError socketError )
         model->getState() == ST_MAKING_STEP
     )
         model->setState( ST_PLACING_SHIPS );
+
+    if( socketError == QAbstractSocket::ConnectionRefusedError )
+        emit gameError( GEM_SERVER_CONNECTION_REFUSED );
 }
 
 void Controller::onConnected()
