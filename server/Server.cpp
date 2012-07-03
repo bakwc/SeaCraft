@@ -266,7 +266,7 @@ bool Server::stateAuthorize( const QString& cmd, ClientsIterator client )
         }
     }
 
-    if( cus != CUS_OK )
+    if( cus != CUS_OK || !guestAllowed_ && login == DEFAULT_GUEST_ACCOUNT )
     {
         client->send( "wronguser:" );
         disconnectClient( client );
@@ -443,7 +443,7 @@ Server::CheckUserStatus Server::checkUserLogin(
     const QString& password
 )
 {
-    if( login == "guest" && guestAllowed_ )
+    if( guestAllowed_ && login == DEFAULT_GUEST_ACCOUNT )
         return CUS_OK;
 
     if( !QFile::exists(authFile_) )

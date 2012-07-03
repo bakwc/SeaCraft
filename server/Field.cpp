@@ -111,6 +111,9 @@ Field::Cell Field::getCellPrivate(
 {
     int n = y * fieldLength_ + x;
 
+    if( x < 0 || y < 0 || x >= getFieldLength() || y >= getFieldLength() )
+        return CI_CLEAR;
+
     if( n < 0 || (quint32) n > getFieldSize() )
         return CI_CLEAR;
 
@@ -125,6 +128,9 @@ void Field::setCellPrivate(
 ) const
 {
     int n = y * fieldLength_ + x;
+
+    if( x < 0 || y < 0 || x >= getFieldLength() || y >= getFieldLength() )
+        return;
 
     if( n < 0 || (quint32) n > getFieldSize() )
         return;
