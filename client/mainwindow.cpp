@@ -232,6 +232,7 @@ void MainWindow::showGameError( GameErrorMessage message )
         break;
 
     case GEM_SERVER_CONNECTION_REFUSED:
+    case GEM_SERVER_UNAVAILABLE:
         messageString = tr(
             "Cannot connect to the server."
         );

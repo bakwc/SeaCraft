@@ -307,14 +307,20 @@ void Controller::onGameStart()
         return;
     }
 
+    client->connectToHost( serverAddress, serverPort );
+
+    if( !client->waitForConnected(DEFAULT_SERVER_TIMEOUT) )
+    {
+        emit gameError( GEM_SERVER_UNAVAILABLE );
+        return;
+    }
+
     qDebug(
         "Connected to host %s:%d as %s",
         qPrintable(serverAddress.toString()),
         serverPort,
         qPrintable(model->getLogin())
     );
-
-    client->connectToHost( serverAddress, serverPort );
 }
 
 void Controller::onGameQuit()
