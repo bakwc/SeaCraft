@@ -70,6 +70,8 @@ private:
     bool parseWrongStep( const QString& data );
     bool parseWrongField( const QString& data );
     void placeShipAtRandom( int size );
+    void markShip( int x, int y, Cell cell, bool atEnemyField = false );
+    void markEnemyPoint( int x, int y, Cell cell );
     void readConfig();
     void saveConfig();
 

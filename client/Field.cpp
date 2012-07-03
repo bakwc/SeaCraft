@@ -13,6 +13,9 @@ Cell Field::getCell( int x, int y )
 {
     int n = y * 10 + x;
 
+    if( x < 0 || y < 0 || x >= 10 || y >= 10 )
+        return CL_CLEAR;
+
     if( n >= 0 && n < field.size() )
         return field[n];
 
@@ -24,13 +27,16 @@ void Field::setCell( int x, int y, Cell cell )
 {
     int n = y * 10 + x;
 
-    if( n >= 0 && n < field.size() )
+    if(
+        x >= 0 && y >= 0 && x < 10 && y < 10 &&
+        n >= 0 && n < field.size()
+    )
     {
         field[n] = cell;
         return;
     }
 
-    qDebug() << "ERROR: no such cell (" << x << "x" << y << ")";
+    //qDebug() << "ERROR: no such cell (" << x << "x" << y << ")";
 }
 
 QString Field::getField()

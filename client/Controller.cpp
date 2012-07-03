@@ -95,7 +95,7 @@ void Controller::onMousePressed( const QPoint& pos, bool setShip )
     {
         QPoint point = getMyFieldCoord( pos );
 
-        if( point.x() == -1 )
+        if( point.x() == -1 || point.y() == -1 )
             return;
 
         qDebug() << "Ship at" << point.x() << point.y();
@@ -108,12 +108,16 @@ void Controller::onMousePressed( const QPoint& pos, bool setShip )
     {
         QPoint point = getEnemyFieldCoord( pos );
 
-        if( point.x() == -1 )
+        if( point.x() == -1 || point.y() == -1 )
             return;
 
         qDebug() << "Going to" << point.x() << point.y();
-        if( model->getEnemyCell(point.x(), point.y()) == CL_CLEAR )
-            model->setEnemyCell( point.x(), point.y(), CL_DOT );
+        Cell cell = model->getEnemyCell( point.x(), point.y() );
+
+        if( cell != CL_CLEAR )
+            return;
+
+        model->setEnemyCell( point.x(), point.y(), CL_DOT );
 
         QString cmd;
         cmd = QString( "step:%1:%2:" ).arg( point.x() ).arg( point.y() );
@@ -222,18 +226,42 @@ bool Controller::parseFields( const QString& data )
         Cell cell = type == "half"
             ? CL_HALF
             : type == "kill"
-            ? CL_HALF
+            ? CL_SHIP
             : CL_DOT;
 
-        if( field == 2 )
-            model->setEnemyCell( xpos, ypos, cell );
-        else
-            model->setMyCell( xpos, ypos, cell );
-
+        markShip( xpos, ypos, cell, field == 2 );
         pos += rx.matchedLength();
     }
 
     return pos;
+}
+
+void Controller::markShip( int x, int y, Cell cell, bool atEnemyField )
+{
+    if( cell == CL_SHIP )
+    {
+        if( !atEnemyField )
+            cell = CL_HALF;
+        else
+            for( int i = -1; i <= 1; i++ )
+            {
+                markEnemyPoint( x + 1, y + i, CL_DOT );
+                markEnemyPoint( x - 1, y + i, CL_DOT );
+                markEnemyPoint( x + i, y + 1, CL_DOT );
+                markEnemyPoint( x + i, y - 1, CL_DOT );
+            }
+    }
+
+    if( atEnemyField )
+        model->setEnemyCell( x, y, cell );
+    else
+        model->setMyCell( x, y, cell );
+}
+
+void Controller::markEnemyPoint( int x, int y, Cell cell )
+{
+    if( model->getEnemyCell(x, y) == CL_CLEAR )
+        model->setEnemyCell( x, y, cell );
 }
 
 bool Controller::parseGameResult( const QString& data )
@@ -379,10 +407,7 @@ void Controller::onError( QAbstractSocket::SocketError socketError )
         model->getState() == ST_WAITING_STEP ||
         model->getState() == ST_MAKING_STEP
     )
-    {
         model->setState( ST_PLACING_SHIPS );
-        emit gameError( GEM_SERVER_ERROR );
-    }
 }
 
 void Controller::onConnected()
