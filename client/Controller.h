@@ -23,7 +23,8 @@ enum GameErrorMessage
     GEM_NONE = 0,
     GEM_ALREADY_CONNECTED,
     GEM_WRONG_FIELD,
-    GEM_WRONG_USER
+    GEM_WRONG_USER,
+    GEM_SERVER_ERROR
 };
 
 class Controller: public QWidget

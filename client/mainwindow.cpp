@@ -227,6 +227,10 @@ void MainWindow::showGameError( GameErrorMessage message )
         messageString = tr( "You are already connected!" );
         break;
 
+    case GEM_SERVER_ERROR:
+        messageString = tr( "Server error!" );
+        break;
+
     default:
         return;
     }

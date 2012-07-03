@@ -1,3 +1,4 @@
+#include <QAbstractSocket>
 #include "Controller.h"
 
 const QString& DEFAULT_CONFIG_FILE = "config.ini";
@@ -373,6 +374,15 @@ void Controller::onError( QAbstractSocket::SocketError socketError )
 {
     Q_UNUSED( socketError );
     qDebug() << client->errorString();
+
+    if(
+        model->getState() == ST_WAITING_STEP ||
+        model->getState() == ST_MAKING_STEP
+    )
+    {
+        model->setState( ST_PLACING_SHIPS );
+        emit gameError( GEM_SERVER_ERROR );
+    }
 }
 
 void Controller::onConnected()
