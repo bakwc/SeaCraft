@@ -185,7 +185,8 @@ void MainWindow::redraw()
 {
     if( controller->getState() == ST_PLACING_SHIPS )
         ui->labelOpponent->clear();
-    if ( controller->getState() == ST_PLACING_SHIPS )
+
+    if( controller->getState() == ST_PLACING_SHIPS )
     {
         ui->actionStart->setDisabled(false);
         ui->actionLeave->setDisabled(true);
@@ -197,6 +198,7 @@ void MainWindow::redraw()
         ui->actionLeave->setDisabled(false);
         ui->menuField->setDisabled(true);
     }
+
     this->update();
 }
 
@@ -270,5 +272,11 @@ void MainWindow::on_actionRandom_triggered()
 void MainWindow::on_actionLeave_activated()
 {
     controller->onGameQuit();
-    QMessageBox::information( this, tr("Game Info"), tr("You have disconnected!") );
+    QMessageBox::information(
+        this,
+        tr("Game Info"),
+        tr("You have disconnected!")
+    );
+
+    redraw();
 }
