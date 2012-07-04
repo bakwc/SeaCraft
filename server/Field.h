@@ -33,10 +33,10 @@ public:
     Cell getCell( int x, int y ) const;
     void setCell( int x, int y, Cell cell );
     bool checkField() const;
-    int getShipSize() const;
-    int getFieldLength() const;
-    int getFieldSize() const;
-    int getShipsCount() const;
+    quint32 getShipSize() const;
+    quint32 getFieldLength() const;
+    quint32 getFieldSize() const;
+    quint32 getShipsCount() const;
     bool isAllKilled() const;
     bool makeShot( int x, int y, Shots& killShots );
     void addKilledShip( int shipSize );

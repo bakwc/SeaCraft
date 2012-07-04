@@ -142,10 +142,23 @@ void Server::timerEvent( QTimerEvent* event )
 {
     Q_UNUSED( event );
     // Searching for free clients and connecting them
+    // Also removing inactive clients
     ClientsIterator freeClient = clients_.end();
 
     for( ClientsIterator cit = clients_.begin(); cit != clients_.end(); cit++ )
     {
+        if (cit->lastSeen() >= DEFAULT_INACTIVE_MIN)
+            cit->socket->write("ping:");
+
+        if (cit->lastSeen() >= DEFAULT_INACTIVE_MAX)
+        {
+            ClientsIterator newCit=cit+1;
+            disconnectClient( cit );
+            cit=newCit;                 // TODO: review (check, if removed correctly)
+            if (cit==clients_.end())
+                break;
+        }
+
         if( cit->status != Client::ST_READY )
             continue;
 
@@ -211,6 +224,8 @@ void Server::parseData( const QString& cmd, int clientId )
 {
     ClientsIterator cit = clients_.find( clientId );
 
+    cit->setSeen();
+
     if( cit == clients_.end() )
         return;
 
@@ -224,6 +239,9 @@ void Server::parseData( const QString& cmd, int clientId )
         return;
 
     if( stateRecieveStatus(cmd, cit) )
+        return;
+
+    if( stateRecievePing(cmd, cit) )
         return;
 
     cit->send( "wrongcmd:" );
@@ -266,7 +284,7 @@ bool Server::stateAuthorize( const QString& cmd, ClientsIterator client )
         }
     }
 
-    if( cus != CUS_OK || !guestAllowed_ && login == DEFAULT_GUEST_ACCOUNT )
+    if( cus != CUS_OK || (!guestAllowed_ && login == DEFAULT_GUEST_ACCOUNT) )
     {
         client->send( "wronguser:" );
         disconnectClient( client );
@@ -312,6 +330,16 @@ bool Server::stateRecieveField( const QString& cmd, ClientsIterator client )
     return true;
 }
 
+bool Server::stateRecievePing( const QString& cmd, ClientsIterator client )
+{
+    QRegExp rx( "pong:" );
+    if( rx.indexIn(cmd) == -1 )
+        return false;
+
+    client->setSeen();
+    return true;
+}
+
 bool Server::stateRecieveSteps( const QString& cmd, ClientsIterator client )
 {
     QRegExp rx( "step:(\\d):(\\d):" );
@@ -323,8 +351,8 @@ bool Server::stateRecieveSteps( const QString& cmd, ClientsIterator client )
 
     qDebug() << "User" << client->login << "is making step";
 
-    int x = rx.cap( 1 ).toInt();
-    int y = rx.cap( 2 ).toInt();
+    quint32 x = rx.cap( 1 ).toInt();
+    quint32 y = rx.cap( 2 ).toInt();
 
     QString response1, response2;
     Field* enemyField = client->playingWith->field();
@@ -420,17 +448,24 @@ bool Server::stateRecieveStatus( const QString& cmd, ClientsIterator client )
     if( client->playingWith != clients_.end() )
         disconnectClient( client->playingWith );
 
-    qDebug() << "User" << client->login << "is disconnected";
     return true;
 }
 
 void Server::disconnectClient( ClientsIterator client )
 {
+ //   int cid = client->socket->socketDescriptor();
     client->socket->disconnectFromHost();
-    int cid = client->socket->socketDescriptor();
 
+
+    qDebug() << "User" << client->login << "is disconnected";
+
+    clients_.erase(client);
+    /*
     if( clients_.find(cid) != clients_.end() )
+    {
+        qDebug() << "Trying to remove";
         clients_.remove( cid );
+    }*/
 }
 
 bool Server::checkProtocolVersion( int version )

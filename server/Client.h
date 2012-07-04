@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtNetwork/QTcpSocket>
+#include <ctime>
 #include "Field.h"
 
 class Client
@@ -29,9 +30,12 @@ public:
 
     void setField( const QString& field, int shipSize );
     Field* field();
+    void setSeen();
+    size_t lastSeen();
 
 private:
     Field* field_;
+    size_t lastSeen_;
 };
 
 typedef QMap<int, Client> Clients;

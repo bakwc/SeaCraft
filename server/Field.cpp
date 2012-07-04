@@ -222,17 +222,17 @@ bool Field::checkField() const
     return true;
 }
 
-int Field::getShipSize() const
+quint32 Field::getShipSize() const
 {
     return shipSize_;
 }
 
-int Field::getFieldLength() const
+quint32 Field::getFieldLength() const
 {
     return fieldLength_;
 }
 
-int Field::getFieldSize() const
+quint32 Field::getFieldSize() const
 {
     return fieldLength_ * fieldLength_;
 }
@@ -246,7 +246,7 @@ bool Field::isAllKilled() const
     return killedCount >= getShipsCount();
 }
 
-int Field::getShipsCount() const
+quint32 Field::getShipsCount() const
 {
     return shipSize_ * (shipSize_ + 1) / 2;
 }

@@ -13,3 +13,5 @@ const quint16 LOGIN_LENGTH_MIN = 2;
 const quint16 LOGIN_LENGTH_MAX = 16;
 const quint16 PASSWORD_LENGTH_MIN = 4;
 const quint16 PASSWORD_LENGTH_MAX = 32;
+const quint16 DEFAULT_INACTIVE_MIN = 30;
+const quint16 DEFAULT_INACTIVE_MAX = 65;

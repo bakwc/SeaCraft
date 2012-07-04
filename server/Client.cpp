@@ -28,3 +28,13 @@ Field* Client::field()
 {
     return field_;
 }
+
+void Client::setSeen()
+{
+    lastSeen_=time(NULL);
+}
+
+size_t Client::lastSeen()
+{
+    return time(NULL)-lastSeen_;
+}

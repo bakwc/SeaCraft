@@ -65,6 +65,7 @@ private:
     void parseData( const QString& cmd, int clientId );
     bool stateAuthorize( const QString& cmd, ClientsIterator client );
     bool stateRecieveField( const QString& cmd, ClientsIterator client );
+    bool stateRecievePing( const QString& cmd, ClientsIterator client );
     bool stateRecieveSteps( const QString& cmd, ClientsIterator client );
     bool stateRecieveStatus( const QString& cmd, ClientsIterator client );
     bool checkProtocolVersion( int version );

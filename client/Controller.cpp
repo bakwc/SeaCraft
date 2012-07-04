@@ -342,6 +342,7 @@ void Controller::onGameQuit()
     {
         qDebug() << "Disconnecting from host";
         client->write( "disconnect:" );
+        client->flush();
         client->disconnectFromHost();
         model->clearEnemyField();
         model->clearMyField();
