@@ -64,6 +64,7 @@ private slots:
 
 private:
     void parseData( const QString& data );
+    bool parsePing( const QString& data );
     bool parseFound( const QString& data );
     bool parseGo( const QString& data );
     bool parseGameResult( const QString& data );

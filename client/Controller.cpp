@@ -147,6 +147,19 @@ void Controller::parseData( const QString& data )
     parseGo( data );
     parseGameResult( data );
     parseErrorInfo( data );
+    parsePing( data );
+}
+
+bool Controller::parsePing( const QString& data )
+{
+    QRegExp rx( "ping:" );
+
+    if( rx.indexIn(data) == -1 )
+        return false;
+
+    qDebug() << "Ping request";
+    client->write("pong:\n");
+    return true;
 }
 
 bool Controller::parseFound( const QString& data )
