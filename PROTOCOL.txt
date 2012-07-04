@@ -85,6 +85,8 @@ Session's description
 14) If client wants to leave game, it says 'disconnect:'
 15) If server receives 'disconnect:' command,
 	it considers that client lost and closing connection.
+16) Server could send 'ping:' command.
+	Client should respond with 'pong:'
 
 
 
