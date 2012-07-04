@@ -328,7 +328,7 @@ void Controller::onGameQuit()
     if( client->state() == QAbstractSocket::ConnectedState )
     {
         qDebug() << "Disconnecting from host";
-        client->write( "quit:" );
+        client->write( "disconnect:" );
         client->disconnectFromHost();
         model->clearEnemyField();
         model->clearMyField();

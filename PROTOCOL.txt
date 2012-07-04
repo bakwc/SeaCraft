@@ -77,15 +77,14 @@ Session's description
 8) Server says: 'field1:hits_info:cell_X:cell_Y:'.
 9) After finishing a game server says 'win:' or 'lose:' and closes connection.
 10) In case of an opponent has left the game
-	server says 'disconnected:' and closes connection.
+	server says 'win:' and closes connection.
 11) In case of bad request server says 'wrongcmd:'
 12) In case of illegal login or password
 	server says 'wronguser:' and closes connection.
 13) On protocol version mismatch server says 'wrongver:' and closes connection.
-
-14) If client wants to leave game, it says 'quit:'
-
-15) If server receives 'quit:' command, it considers that client lost and closing connection.
+14) If client wants to leave game, it says 'disconnect:'
+15) If server receives 'disconnect:' command,
+	it considers that client lost and closing connection.
 
 
 
