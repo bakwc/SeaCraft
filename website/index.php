@@ -1,3 +1,7 @@
+<?PHP
+$fileName="../server/stats";	// File with statistics
+?>
+
 <html>
     <head>
         <title>SeaCraft</title>
@@ -16,7 +20,31 @@
                     <h2>Screenshots<h2>
                     <a href="images/screen.png" target="_blank"><img width=320 src="images/screen.png"></img></a>
                     <h2>Top Score</h2>
-                    <p>Score is not available yet. We are working on that.</p>
+                    <table>
+						<thead>
+							<tr>
+								<td>Player</td><td>Wins</td><td>Loses</td>
+							</tr>
+						</thead>
+						<tbody>
+							<?
+							$f = fopen($fileName,'r');
+							while (!feof($f))
+							{
+								$line = fgets($f, 999);
+								$arr = explode (":", $line);
+								if (count($arr)==4)
+								{
+									echo "<tr><td>".$arr[0].
+										"</td><td>".$arr[1].
+										"</td><td>".$arr[2].
+										"</td></tr>";
+								}
+							}
+							fclose($f);
+							?>
+						</tbody>
+					</table>
                 </div>
             </div>
             <div id="right"></div>
