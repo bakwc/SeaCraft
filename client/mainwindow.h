@@ -44,6 +44,8 @@ private slots:
     void on_actionClear_triggered();
     void on_actionRandom_triggered();
 
+    void on_actionLeave_activated();
+
 private:
     void setStatus( const QString& status );
 

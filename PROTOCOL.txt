@@ -83,5 +83,10 @@ Session's description
 	server says 'wronguser:' and closes connection.
 13) On protocol version mismatch server says 'wrongver:' and closes connection.
 
+14) If client wants to leave game, it says 'quit:'
+
+15) If server receives 'quit:' command, it considers that client lost and closing connection.
+
+
 
 1010010100101001010010100101001010010100101001010010100101001010010100101001010010100101001010010100

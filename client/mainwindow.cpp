@@ -36,6 +36,8 @@ MainWindow::MainWindow( QWidget* parent ):
         this,
         SLOT(changeGameOpponent(QString))
     );
+
+    this->redraw();
 }
 
 MainWindow::~MainWindow()
@@ -176,12 +178,25 @@ void MainWindow::on_actionStart_activated()
         connectionDialog->getPassword()
     );
     controller->onGameStart();
+    redraw();
 }
 
 void MainWindow::redraw()
 {
     if( controller->getState() == ST_PLACING_SHIPS )
         ui->labelOpponent->clear();
+    if ( controller->getState() == ST_PLACING_SHIPS )
+    {
+        ui->actionStart->setDisabled(false);
+        ui->actionLeave->setDisabled(true);
+        ui->menuField->setDisabled(false);
+    }
+    else
+    {
+        ui->actionStart->setDisabled(true);
+        ui->actionLeave->setDisabled(false);
+        ui->menuField->setDisabled(true);
+    }
     this->update();
 }
 
@@ -250,4 +265,10 @@ void MainWindow::on_actionRandom_triggered()
 {
     controller->randomField();
     this->update();
+}
+
+void MainWindow::on_actionLeave_activated()
+{
+    controller->onGameQuit();
+    QMessageBox::information( this, tr("Game Info"), tr("You have disconnected!") );
 }

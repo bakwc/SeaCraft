@@ -84,7 +84,7 @@
      <x>0</x>
      <y>0</y>
      <width>555</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -92,6 +92,7 @@
      <string>Game</string>
     </property>
     <addaction name="actionStart"/>
+    <addaction name="actionLeave"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -135,6 +136,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionLeave">
+   <property name="text">
+    <string>Leave</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
  </widget>

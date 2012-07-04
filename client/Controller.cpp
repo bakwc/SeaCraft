@@ -328,8 +328,10 @@ void Controller::onGameQuit()
     if( client->state() == QAbstractSocket::ConnectedState )
     {
         qDebug() << "Disconnecting from host";
-        client->write( "disconnect:" );
+        client->write( "quit:" );
         client->disconnectFromHost();
+        model->clearEnemyField();
+        model->clearMyField();
         model->setState( ST_PLACING_SHIPS );
     }
 }
