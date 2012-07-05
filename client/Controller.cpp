@@ -221,6 +221,9 @@ bool Controller::parseWrongField( const QString& data )
 
     qDebug() << "Maked wrong field";
     model->setState( ST_PLACING_SHIPS );
+    model->clearEnemyField();
+    model->clearMyField();
+    emit gameError( GEM_WRONG_FIELD );
     return true;
 }
 

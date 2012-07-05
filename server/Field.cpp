@@ -111,7 +111,8 @@ Field::Cell Field::getCellPrivate(
 {
     int n = y * fieldLength_ + x;
 
-    if( x < 0 || y < 0 || x >= getFieldLength() || y >= getFieldLength() )
+    if( x < 0 || y < 0 || x >= (qint32) getFieldLength()
+            || y >= (qint32) getFieldLength() )
         return CI_CLEAR;
 
     if( n < 0 || (quint32) n > getFieldSize() )
@@ -129,7 +130,8 @@ void Field::setCellPrivate(
 {
     int n = y * fieldLength_ + x;
 
-    if( x < 0 || y < 0 || x >= getFieldLength() || y >= getFieldLength() )
+    if( x < 0 || y < 0 || x >= (qint32) getFieldLength()
+            || y >= (qint32) getFieldLength() )
         return;
 
     if( n < 0 || (quint32) n > getFieldSize() )
@@ -140,13 +142,26 @@ void Field::setCellPrivate(
 
 bool Field::checkField() const
 {
-    if( field_.size() < getFieldSize() || field_.size() == 0 )
+    if( (quint32) field_.size() < getFieldSize() || field_.size() == 0 )
         return false;
 
     Cells field( field_ );
 
     QVector<int> shipsCount;
     shipsCount.fill( 0, shipSize_ );
+
+
+    for( int y = 0; y < fieldLength_; y++ )     // Check for diagonal placement
+        for( int x = 0; x < fieldLength_; x++ )
+            if (getCellPrivate( x, y, field )!=CI_CLEAR)
+            {
+                bool chk=(getCellPrivate( x-1, y-1, field )==CI_CLEAR) &&
+                        (getCellPrivate( x-1, y+1, field )==CI_CLEAR) &&
+                        (getCellPrivate( x+1, y-1, field )==CI_CLEAR) &&
+                        (getCellPrivate( x+1, y+1, field )==CI_CLEAR);
+                if (!chk) return false;
+            }
+
 
     Cell cell;
     int n;
@@ -239,7 +254,7 @@ quint32 Field::getFieldSize() const
 
 bool Field::isAllKilled() const
 {
-    int killedCount = 0;
+    quint32 killedCount = 0;
     for( int i = 0; i < shipSize_; i++ )
         killedCount += killedShips_[i];
 
