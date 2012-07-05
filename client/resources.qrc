@@ -6,5 +6,6 @@
         <file>half.png</file>
         <file>redfull.png</file>
         <file>redhalf.png</file>
+        <file>russian.qm</file>
     </qresource>
 </RCC>

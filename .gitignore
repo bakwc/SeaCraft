@@ -12,14 +12,11 @@ server-*/
 server/debug*/
 server/release*/
 
-serverPro-*/
-serverPro/debug*/
-serverPro/release*/
-
 build*/
 binary*/
 
 ui_*.h
+*.qm
 
 Makefile*
 *.user*

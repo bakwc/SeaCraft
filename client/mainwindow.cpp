@@ -77,15 +77,15 @@ void MainWindow::paintEvent( QPaintEvent* event )
     switch( controller->getState() )
     {
     case ST_PLACING_SHIPS:
-        setStatus( "placing ships" );
+        setStatus( tr("placing ships") );
         break;
 
     case ST_MAKING_STEP:
-        setStatus( "your step" );
+        setStatus( tr("your step") );
         break;
 
     case ST_WAITING_STEP:
-        setStatus( "wait for enemy" );
+        setStatus( tr("wait for enemy") );
         break;
     }
 }
@@ -250,9 +250,7 @@ void MainWindow::showGameError( GameErrorMessage message )
 
     case GEM_SERVER_CONNECTION_REFUSED:
     case GEM_SERVER_UNAVAILABLE:
-        messageString = tr(
-            "Cannot connect to the server."
-        );
+        messageString = tr( "Cannot connect to the server." );
         break;
 
     default:

@@ -36,3 +36,10 @@ FORMS    += mainwindow.ui
 
 RESOURCES += \
     resources.qrc
+
+TRANSLATIONS += \
+    russian.ts
+
+langsRelease.commands = lrelease $${_PRO_FILE_}
+QMAKE_EXTRA_TARGETS += langsRelease
+PRE_TARGETDEPS += langsRelease
