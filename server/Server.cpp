@@ -138,25 +138,33 @@ const QString& Server::statFile() const
     return statFile_;
 }
 
+// Searching for free clients and connecting them
+// Also removing inactive clients
 void Server::timerEvent( QTimerEvent* event )
 {
     Q_UNUSED( event );
-    // Searching for free clients and connecting them
-    // Also removing inactive clients
     ClientsIterator freeClient = clients_.end();
 
     for( ClientsIterator cit = clients_.begin(); cit != clients_.end(); cit++ )
     {
-        if (cit->lastSeen() >= DEFAULT_INACTIVE_MIN)
-            cit->socket->write("ping:");
-
-        if (cit->lastSeen() >= DEFAULT_INACTIVE_MAX)
+        // Remove disconnected clients from list
+        if( cit->status == Client::ST_DISCONNECTED )
         {
-            ClientsIterator newCit=cit+1;
-            disconnectClient( cit );
-            cit=newCit;                 // TODO: review (check, if removed correctly)
-            if (cit==clients_.end())
-                break;
+            if( freeClient == cit )
+                freeClient = clients_.end();
+
+            cit = clients_.erase( cit );
+            continue;
+        }
+
+        if( cit->lastSeen() >= DEFAULT_INACTIVE_MIN )
+            cit->socket->write( "ping:" );
+
+        // Mark zombie clients as disconnected and record to the statistic
+        if( cit->lastSeen() >= DEFAULT_INACTIVE_MAX )
+        {
+            disconnectClientAndRecord( cit, false );
+            continue;
         }
 
         if( cit->status != Client::ST_READY )
@@ -360,7 +368,7 @@ bool Server::stateRecieveSteps( const QString& cmd, ClientsIterator client )
 
     if(
         (current != Field::CI_CLEAR && current > Field::CellShipsTypeCount) ||
-        x < 0 || y < 0 ||
+        //x < 0 || y < 0 ||
         x >= enemyField->getFieldLength() ||
         y >= enemyField->getFieldLength()
     )
@@ -409,16 +417,7 @@ bool Server::stateRecieveSteps( const QString& cmd, ClientsIterator client )
 
     if( enemyField->isAllKilled() )
     {
-        client->send( "win:" );
-        client->playingWith->send( "lose:" );
-
-        recordSessionStatistic(
-            client->login,
-            client->playingWith->login
-        );
-
-        disconnectClient( client->playingWith );
-        disconnectClient( client );
+        disconnectClientAndRecord( client, true );
         return true;
     }
 
@@ -432,40 +431,56 @@ bool Server::stateRecieveStatus( const QString& cmd, ClientsIterator client )
     if( rx.indexIn(cmd) == -1 )
         return false;
 
+    disconnectClientAndRecord( client, false );
+    return true;
+}
+
+// Disconnect client from server
+void Server::disconnectClient( ClientsIterator client )
+{
+    client->socket->disconnectFromHost();
+    client->status = Client::ST_DISCONNECTED;
+    client->playingWith->playingWith = clients_.end();
+    client->playingWith = clients_.end();
+
+    qDebug() << "User" << client->login << "is disconnected";
+}
+
+// Disconnect client from server and record winner status for him and his
+// opponent, if there was a game between'em
+void Server::disconnectClientAndRecord(
+    ClientsIterator client,
+    bool winnerStatus
+)
+{
+    if( client == clients_.end() )
+        return;
+
     if(
         client->status == Client::ST_MAKING_STEP ||
         client->status == Client::ST_WAITING_STEP
     )
     {
-        client->playingWith->send( "win:" );
+        Client& winner = winnerStatus
+            ? client.value()
+            : client->playingWith.value();
+        Client& looser = !winnerStatus
+            ? client.value()
+            : client->playingWith.value();
+
+        winner.send( "win:" );
+        looser.send( "lose:" );
+
         recordSessionStatistic(
-            client->playingWith->login,
-            client->login
+            winner.login,
+            looser.login
         );
     }
 
-    disconnectClient( client );
     if( client->playingWith != clients_.end() )
         disconnectClient( client->playingWith );
 
-    return true;
-}
-
-void Server::disconnectClient( ClientsIterator client )
-{
- //   int cid = client->socket->socketDescriptor();
-    client->socket->disconnectFromHost();
-
-
-    qDebug() << "User" << client->login << "is disconnected";
-
-    clients_.erase(client);
-    /*
-    if( clients_.find(cid) != clients_.end() )
-    {
-        qDebug() << "Trying to remove";
-        clients_.remove( cid );
-    }*/
+    disconnectClient( client );
 }
 
 bool Server::checkProtocolVersion( int version )

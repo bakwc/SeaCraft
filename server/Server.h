@@ -62,6 +62,7 @@ private:
         Clients::iterator client2
     );
     void disconnectClient( ClientsIterator client );
+    void disconnectClientAndRecord( ClientsIterator client, bool winnerStatus );
     void parseData( const QString& cmd, int clientId );
     bool stateAuthorize( const QString& cmd, ClientsIterator client );
     bool stateRecieveField( const QString& cmd, ClientsIterator client );
