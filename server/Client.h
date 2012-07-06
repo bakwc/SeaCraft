@@ -15,7 +15,8 @@ public:
         ST_AUTHORIZED,
         ST_READY,
         ST_WAITING_STEP,
-        ST_MAKING_STEP
+        ST_MAKING_STEP,
+        ST_DISCONNECTED
     };
 
     explicit Client();
