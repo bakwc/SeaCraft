@@ -253,6 +253,10 @@ void MainWindow::showGameError( GameErrorMessage message )
         messageString = tr( "Cannot connect to the server." );
         break;
 
+    case GEM_SERVER_CONNECTION_TIMEOUT:
+        messageString = tr( "Server unavailable." );
+        break;
+
     default:
         return;
     }

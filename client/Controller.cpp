@@ -327,7 +327,9 @@ void Controller::onGameStart()
 
     if( !client->waitForConnected(DEFAULT_SERVER_TIMEOUT) )
     {
-        emit gameError( GEM_SERVER_UNAVAILABLE );
+        if( client->error() == QAbstractSocket::SocketTimeoutError )
+            emit gameError( GEM_SERVER_CONNECTION_TIMEOUT );
+
         return;
     }
 
@@ -435,6 +437,12 @@ void Controller::onError( QAbstractSocket::SocketError socketError )
 
     if( socketError == QAbstractSocket::ConnectionRefusedError )
         emit gameError( GEM_SERVER_CONNECTION_REFUSED );
+
+    if(
+        socketError == QAbstractSocket::HostNotFoundError ||
+        socketError == QAbstractSocket::SocketTimeoutError
+    )
+        emit gameError( GEM_SERVER_UNAVAILABLE );
 }
 
 void Controller::onConnected()

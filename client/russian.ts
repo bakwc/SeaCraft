@@ -178,13 +178,18 @@
         <translation type="unfinished">Невозможно подключиться к серверу.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="261"/>
-        <location filename="mainwindow.cpp" line="275"/>
+        <location filename="mainwindow.cpp" line="257"/>
+        <source>Server unavailable.</source>
+        <translation type="unfinished">Сервер недоступен.</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="265"/>
+        <location filename="mainwindow.cpp" line="279"/>
         <source>Game Info</source>
         <translation type="unfinished">Информация</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="276"/>
+        <location filename="mainwindow.cpp" line="280"/>
         <source>You have disconnected!</source>
         <translation type="unfinished">Вы отключены!</translation>
     </message>
