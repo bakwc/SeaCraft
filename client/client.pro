@@ -14,8 +14,9 @@ TEMPLATE = app
 
 CONFIG += static
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
+SOURCES += \
+    main.cpp\
+    mainwindow.cpp \
     Field.cpp \
     Images.cpp \
     Model.cpp \
@@ -23,7 +24,8 @@ SOURCES += main.cpp\
     Utility.cpp \
     ConnectionInfoDialog.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS += \
+    mainwindow.h \
     Field.h \
     Images.h \
     Model.h \
@@ -43,3 +45,18 @@ TRANSLATIONS += \
 langsRelease.commands = lrelease $${_PRO_FILE_}
 QMAKE_EXTRA_TARGETS += langsRelease
 PRE_TARGETDEPS += langsRelease
+
+# PlaySound utility
+HEADERS += util/PlaySound.h
+SOURCES += util/PlaySound.cpp
+
+CONFIG( unix ) {
+    LIBS += -lasound
+    SOURCES += util/PlaySound_nix.cpp
+    HEADERS += util/PlaySound_nix.h
+}
+
+CONFIG( windows ) {
+    SOURCES += util/PlaySound_win.cpp
+    HEADERS += util/PlaySound_win.h
+}

@@ -9,6 +9,7 @@
 #include "Model.h"
 #include "Utility.h"
 #include "ConnectionInfoDialog.h"
+#include "util/PlaySound.h"
 
 enum GameResult
 {
@@ -85,4 +86,6 @@ private:
     QHostAddress serverAddress;
     quint16 serverPort;
     bool connectionError;
+    PlaySound* hitSound;
+    PlaySound* missSound;
 };

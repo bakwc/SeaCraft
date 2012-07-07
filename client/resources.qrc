@@ -7,5 +7,7 @@
         <file>redfull.png</file>
         <file>redhalf.png</file>
         <file>russian.qm</file>
+        <file>hit.wav</file>
+        <file>miss.wav</file>
     </qresource>
 </RCC>

@@ -15,6 +15,7 @@
 #include "Controller.h"
 #include "Defines.h"
 
+#include "util/PlaySound.h"
 
 namespace Ui
 {

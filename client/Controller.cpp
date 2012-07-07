@@ -27,6 +27,9 @@ Controller::Controller( Model* model_ ):
     );
 
     readConfig();
+
+    hitSound = new PlaySound( ":/hit.wav", this );
+    missSound = new PlaySound( ":/miss.wav", this );
 }
 
 Controller::~Controller()
@@ -244,6 +247,11 @@ bool Controller::parseFields( const QString& data )
             : type == "kill"
             ? CL_SHIP
             : CL_DOT;
+
+        if( type == "half" || type == "kill" )
+            hitSound->play();
+        else
+            missSound->play();
 
         markShip( xpos, ypos, cell, field == 2 );
         pos += rx.matchedLength();
