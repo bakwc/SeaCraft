@@ -440,7 +440,8 @@ void Server::disconnectClient( ClientsIterator client )
 {
     client->socket->disconnectFromHost();
     client->status = Client::ST_DISCONNECTED;
-    client->playingWith->playingWith = clients_.end();
+    if( client->playingWith != clients_.end() )
+        client->playingWith->playingWith = clients_.end();
     client->playingWith = clients_.end();
 
     qDebug() << "User" << client->login << "is disconnected";
