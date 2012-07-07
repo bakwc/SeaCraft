@@ -268,9 +268,18 @@ bool Server::stateAuthorize( const QString& cmd, ClientsIterator client )
     const QString& login = rx.cap(2);
     const QString& password = rx.cap(4);
 
+
+    if (isUserConnected(login))
+    {
+        client->send( "alreadyauth:" );
+        disconnectClient( client );
+        return true;
+    }
+
     if( client->status == Client::ST_AUTHORIZED && client->login == login )
     {
         client->send( "alreadyauth:" );
+        disconnectClient( client );
         return true;
     }
 
@@ -434,6 +443,16 @@ bool Server::stateRecieveStatus( const QString& cmd, ClientsIterator client )
     disconnectClientAndRecord( client, false );
     return true;
 }
+
+bool Server::isUserConnected(const QString& login)
+{
+    for (ClientsIterator i=clients_.begin();i!=clients_.end();i++)
+        if (i->login==login)
+            return true;
+    return false;
+}
+
+
 
 // Disconnect client from server
 void Server::disconnectClient( ClientsIterator client )
