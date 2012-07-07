@@ -1,6 +1,8 @@
 #include <QAbstractSocket>
 #include "Controller.h"
 
+#include "util/PlaySound.h"
+
 const QString& DEFAULT_CONFIG_FILE = "config.ini";
 const quint16 DEFAULT_SERVER_PORT = 1234;
 const quint16 DEFAULT_SERVER_TIMEOUT = 5000;

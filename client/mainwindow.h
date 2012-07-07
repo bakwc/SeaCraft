@@ -15,6 +15,7 @@
 #include "Controller.h"
 #include "Defines.h"
 
+#include "util/PlaySound.h"
 
 namespace Ui
 {
@@ -60,6 +61,8 @@ private:
     State state;
     Model* model;
     Controller* controller;
+
+    PlaySound* playsound;
 };
 
 #endif // MAINWINDOW_H
