@@ -29,6 +29,10 @@ void Statistics::checkPlayer( const QString& login )
 
 void Statistics::save( const QString& fname )
 {
+    if (data.empty()) return;
+
+    QMap<quint32,sortStruct> sortedStat;
+
     qDebug() << "Stats: saving";
     qDebug() << "Size of data:" << data.size();
     QFile file( fname );
@@ -41,11 +45,31 @@ void Statistics::save( const QString& fname )
         i++
     )
     {
+        sortStruct tmp;
+        tmp.player = i.key();
+        tmp.roundsLost = i->roundsLost;
+        sortedStat.insert(i->roundsWon,tmp);
+        /*
         out << QString( "%1:%2:%3:\n" )
             .arg( i.key() )
             .arg( i->roundsWon )
             .arg( i->roundsLost );
+        */
     }
+
+    for(QMap<quint32,sortStruct>::iterator
+        i=sortedStat.end()-1;i!=sortedStat.begin();i--)
+    {
+        out << QString( "%1:%2:%3:\n" )
+            .arg( i->player )
+            .arg( i.key() )
+            .arg( i->roundsLost );
+    }
+
+    out << QString( "%1:%2:%3:\n" )
+        .arg( sortedStat.begin()->player )
+        .arg( sortedStat.begin().key() )
+        .arg( sortedStat.begin()->roundsLost );
 
     out << flush;
     file.close();

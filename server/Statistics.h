@@ -12,6 +12,12 @@ struct PlayerStats
     int roundsLost;
 };
 
+struct sortStruct
+{
+    QString player;
+    int roundsLost;
+};
+
 class Statistics
 {
 public:
