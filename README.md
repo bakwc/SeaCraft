@@ -23,3 +23,7 @@ Format of the *statfile*:
 
     login:roundsWon:roundsLost:
 
+#### Compilation remark
+On *Linux* we use **alsa** output for sound effects. So you should have
+the dev-package of *libasound* to compile the project.
+
