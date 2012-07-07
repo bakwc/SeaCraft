@@ -80,6 +80,9 @@ private:
     void markEnemyPoint( int x, int y, Cell cell );
     void readConfig();
     void saveConfig();
+    bool checkError(const QString&,const QString&);
+    void emitError(GameErrorMessage error);
+
 
 private:
     QTcpSocket* client;

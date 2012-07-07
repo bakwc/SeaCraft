@@ -191,16 +191,32 @@ bool Controller::parseGo( const QString& data )
 
 bool Controller::parseErrorInfo( const QString& data )
 {
-    QRegExp rx( "wronguser:" );
+    if (checkError("wronguser:", data))
+    {
+        emitError(GEM_WRONG_USER);
+    }
 
+    if (checkError("alreadyauth:", data))
+        emitError(GEM_ALREADY_CONNECTED);
+
+    return true; //TODO: fix it
+}
+
+bool Controller::checkError(
+        const QString& error, const QString& data)
+{
+    QRegExp rx( error );
     if( rx.indexIn(data) == -1 )
         return false;
+    return true;
+}
 
-    qDebug() << "Wrong user";
+void Controller::emitError(GameErrorMessage error)
+{
+    qDebug() << "Some error";
     model->setState( ST_PLACING_SHIPS );
     connectionError = true;
-    emit gameError( GEM_WRONG_USER );
-    return true;
+    emit gameError( error );
 }
 
 bool Controller::parseWrongStep( const QString& data )
