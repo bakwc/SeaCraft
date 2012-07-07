@@ -51,14 +51,12 @@ HEADERS += util/PlaySound.h
 SOURCES += util/PlaySound.cpp
 
 CONFIG( unix ) {
-#CONFIG( windows ) {
     LIBS += -lasound
     SOURCES += util/PlaySound_nix.cpp
     HEADERS += util/PlaySound_nix.h
 }
 
 CONFIG( windows ) {
-#CONFIG( unix ) {
     SOURCES += util/PlaySound_win.cpp
     HEADERS += util/PlaySound_win.h
 }

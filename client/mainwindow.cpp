@@ -18,8 +18,6 @@ MainWindow::MainWindow( QWidget* parent ):
     ui->labelOpponent->clear();
     model = new Model;
     controller = new Controller( model );
-    playsound = new PlaySound( this );
-
 
     connect( controller, SIGNAL(stateChanged()), this, SLOT(redraw()) );
     connect(
@@ -153,16 +151,6 @@ void MainWindow::mousePressEvent( QMouseEvent* ev )
     QPoint pos = ev->pos();
     pos.setY( pos.y() - this->centralWidget()->y() );
     controller->onMousePressed( pos, ev->button() == Qt::LeftButton );
-
-    if( ev->button() == Qt::LeftButton )
-    {
-        playsound->play( ":/hit.wav" );
-    }
-
-    if( ev->button() == Qt::RightButton )
-    {
-        playsound->play( ":/miss.wav" );
-    }
 }
 
 void MainWindow::closeEvent( QCloseEvent* event )

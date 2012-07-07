@@ -55,8 +55,6 @@ void PlaySoundThread::run()
 
     qDebug( "Playing %s...", qPrintable(sound_->fileName()) );
     sound_->play();
-
-    exec();
 }
 
 void PlaySoundThread::quit()

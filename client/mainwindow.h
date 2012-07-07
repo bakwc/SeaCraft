@@ -61,8 +61,6 @@ private:
     State state;
     Model* model;
     Controller* controller;
-
-    PlaySound* playsound;
 };
 
 #endif // MAINWINDOW_H
