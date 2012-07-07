@@ -210,15 +210,17 @@ void Server::on_newUserConnected()
     Client client;
     client.socket = tcpServer_->nextPendingConnection();
     client.status = Client::ST_CONNECTED;
-    client.playingWith = clients_.end();
-    int clientId = client.socket->socketDescriptor();
-    clients_.insert( clientId, client );
     connect(
-        client.socket,
-        SIGNAL(readyRead()),
-        this,
-        SLOT(on_recievedData())
-    );
+                client.socket,
+                SIGNAL(readyRead()),
+                this,
+                SLOT(on_recievedData())
+                );
+    if(client.status == Client::ST_CONNECTED){
+        client.playingWith = clients_.end();
+        int clientId = client.socket->socketDescriptor();
+        clients_.insert( clientId, client );
+    }
 }
 
 void Server::on_recievedData()
