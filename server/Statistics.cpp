@@ -31,7 +31,7 @@ void Statistics::save( const QString& fname )
 {
     if (data.empty()) return;
 
-    QMap<quint32,sortStruct> sortedStat;
+    QMultiMap<quint32,sortStruct> sortedStat;
 
     qDebug() << "Stats: saving";
     qDebug() << "Size of data:" << data.size();
