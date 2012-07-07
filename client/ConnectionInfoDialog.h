@@ -19,6 +19,7 @@ public:
     void setAddressString( const QString& address, quint16 port );
     void setAddressString( const QHostAddress& address, quint16 port );
     void setLogin( const QString& login );
+    void setPassword( const QString& password);
     QString getAddress() const;
     QString getLogin() const;
     QString getPassword() const;

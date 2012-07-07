@@ -52,6 +52,7 @@ public:
     QString getServerAddress() const;
     quint16 getServerPort() const;
     QString getUserLogin() const;
+    QString getUserPassword() const;
 
 signals:
     void stateChanged();

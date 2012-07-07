@@ -85,6 +85,11 @@ void ConnectionInfoDialog::setLogin( const QString& login )
     loginTextBox->setText( login );
 }
 
+void ConnectionInfoDialog::setPassword( const QString& password)
+{
+    passTextBox->setText( password );
+}
+
 QString ConnectionInfoDialog::getAddress() const
 {
     return address;

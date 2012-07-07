@@ -170,6 +170,8 @@ void MainWindow::on_actionStart_activated()
     );
     connectionDialog->setLogin( controller->getUserLogin() );
 
+    connectionDialog->setPassword( controller->getUserPassword() );
+
     if( connectionDialog->exec() != QDialog::Accepted )
         return;
 

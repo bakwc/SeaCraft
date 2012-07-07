@@ -513,3 +513,8 @@ QString Controller::getUserLogin() const
 {
     return model->getLogin();
 }
+
+QString Controller::getUserPassword() const
+{
+    return model->getPassword();
+}
