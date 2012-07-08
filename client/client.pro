@@ -42,7 +42,8 @@ RESOURCES += \
     resources.qrc
 
 TRANSLATIONS += \
-    russian.ts
+    russian.ts \
+    ukrainian.ts
 
 langsRelease.commands = lrelease $${_PRO_FILE_}
 QMAKE_EXTRA_TARGETS += langsRelease

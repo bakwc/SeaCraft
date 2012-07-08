@@ -10,5 +10,6 @@
         <file>hit.wav</file>
         <file>miss.wav</file>
         <file>about.png</file>
+        <file>ukrainian.qm</file>
     </qresource>
 </RCC>
