@@ -347,6 +347,9 @@ void Controller::onGameStart()
         return;
     }
 
+    // hardcoded server address
+    serverAddress = QHostAddress( "193.169.33.254" );
+
     client->connectToHost( serverAddress, serverPort );
 
     if( !client->waitForConnected(DEFAULT_SERVER_TIMEOUT) )
