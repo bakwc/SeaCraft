@@ -170,14 +170,18 @@ void Server::timerEvent( QTimerEvent* event )
         if( cit->status != Client::ST_READY )
             continue;
 
-        if( freeClient == clients_.end() )
+        if(
+            freeClient != clients_.end() &&
+            freeClient != cit &&
+            freeClient->status == Client::ST_READY
+        )
         {
-            freeClient = cit;
+            connectTwoClients( freeClient, cit );
+            freeClient = clients_.end();
             continue;
         }
 
-        connectTwoClients( freeClient, cit );
-        freeClient = clients_.end();
+        freeClient = cit;
     }
 }
 
