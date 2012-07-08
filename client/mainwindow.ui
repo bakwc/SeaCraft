@@ -84,7 +84,7 @@
      <x>0</x>
      <y>0</y>
      <width>555</width>
-     <height>21</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -103,8 +103,15 @@
     <addaction name="actionClear"/>
     <addaction name="actionRandom"/>
    </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuField"/>
+   <addaction name="menuAbout"/>
   </widget>
   <action name="actionStart">
    <property name="text">
@@ -144,6 +151,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About SeaCraft</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
    </property>
   </action>
  </widget>

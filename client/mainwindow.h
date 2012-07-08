@@ -10,11 +10,11 @@
 #include <QtNetwork/QTcpSocket>
 #include <QString>
 #include <QTime>
+#include <QVBoxLayout>
 #include "Images.h"
 #include "Model.h"
 #include "Controller.h"
 #include "Defines.h"
-
 #include "util/PlaySound.h"
 
 namespace Ui
@@ -44,8 +44,8 @@ private slots:
     void on_actionQuit_triggered();
     void on_actionClear_triggered();
     void on_actionRandom_triggered();
-
     void on_actionLeave_activated();
+    void on_actionAbout_triggered();
 
 private:
     void setStatus( const QString& status );
@@ -57,7 +57,6 @@ private:
 
 private:
     Ui::MainWindow* ui;
-    Images* pictures;
     State state;
     Model* model;
     Controller* controller;

@@ -9,5 +9,6 @@
         <file>russian.qm</file>
         <file>hit.wav</file>
         <file>miss.wav</file>
+        <file>about.png</file>
     </qresource>
 </RCC>

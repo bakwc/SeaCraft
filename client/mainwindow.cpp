@@ -1,7 +1,7 @@
-#include "mainwindow.h"
 #include "ui_mainwindow.h"
-
 #include "util/PlaySound.h"
+#include "AboutDialog.h"
+#include "mainwindow.h"
 
 MainWindow::MainWindow( QWidget* parent ):
     QMainWindow( parent ),
@@ -10,8 +10,7 @@ MainWindow::MainWindow( QWidget* parent ):
     qsrand( QTime::currentTime().msec() );
 
     ui->setupUi( this );
-    pictures = new Images;
-    pictures->load();
+    pictures.load();
 
     ui->labelStatus->setStyleSheet( "QLabel { color : #00157f; }" );
     ui->labelOpponent->setStyleSheet( "QLabel { color : #00157f; }" );
@@ -46,7 +45,6 @@ MainWindow::~MainWindow()
 {
     delete controller;
     delete model;
-    delete pictures;
     delete ui;
 }
 
@@ -70,7 +68,7 @@ void MainWindow::paintEvent( QPaintEvent* event )
     painter.drawImage(
         0,
         deltaY,
-        pictures->get("field")
+        pictures.get("field")
     );
 
     painter.drawImage( MYFIELD_X, MYFIELD_Y + deltaY, myFieldImage() );
@@ -123,19 +121,19 @@ QImage MainWindow::getFieldImage( char fld )
             switch( cell )
             {
             case CL_DOT:
-                painter.drawImage( i * cfx, j * cfy, pictures->get("dot") );
+                painter.drawImage( i * cfx, j * cfy, pictures.get("dot") );
                 break;
 
             case CL_HALF:
                 painter.drawImage(
                     i * cfx,
                     j * cfy,
-                    fld ? pictures->get("half") : pictures->get("redhalf")
+                    fld ? pictures.get("half") : pictures.get("redhalf")
                 );
                 break;
 
             case CL_SHIP:
-                painter.drawImage( i * cfx, j * cfy, pictures->get("full") );
+                painter.drawImage( i * cfx, j * cfy, pictures.get("full") );
                 break;
 
             default:
@@ -285,4 +283,10 @@ void MainWindow::on_actionLeave_activated()
     );
 
     redraw();
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    AboutDialog dlg( this );
+    dlg.exec();
 }

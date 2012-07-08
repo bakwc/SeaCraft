@@ -22,7 +22,8 @@ SOURCES += \
     Model.cpp \
     Controller.cpp \
     Utility.cpp \
-    ConnectionInfoDialog.cpp
+    ConnectionInfoDialog.cpp \
+    AboutDialog.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -32,7 +33,8 @@ HEADERS += \
     Controller.h \
     Utility.h \
     Defines.h \
-    ConnectionInfoDialog.h
+    ConnectionInfoDialog.h \
+    AboutDialog.h
 
 FORMS    += mainwindow.ui
 
