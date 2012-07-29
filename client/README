@@ -1,0 +1,10 @@
+You need Qt4 to build SeaCraft.
+
+Build:
+
+1) qmake
+2) make
+
+Run:
+
+./client
