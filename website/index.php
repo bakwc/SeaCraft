@@ -15,8 +15,7 @@ $fileName="../server/stats";	// File with statistics
                 <div id="document">
                     <p><b>SeaCraft</b> - simple sea battle game.<br/>Download, play, program your own AI and get to the top of the score!</p>
                     <p><a href="https://github.com/bakwc/SeaCraft/downloads">Download</a> client binary release or get the latest sources from <a href="https://github.com/bakwc/SeaCraft">github</a>.<br/>
-                    Information about network protocol is <a href="https://github.com/bakwc/SeaCraft/blob/master/PROTOCOL.txt">here</a>.<br/>
-                    Connection address: <b>193.169.33.254:1234</b></p>
+                    Information about network protocol is <a href="https://github.com/bakwc/SeaCraft/blob/master/PROTOCOL.txt">here</a>.
                     <h2>Screenshots<h2>
                     <a href="images/screen.png" target="_blank"><img width=320 src="images/screen.png"></img></a>
                     <h2>Top Score</h2>
